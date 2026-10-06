@@ -407,7 +407,9 @@ async function startEnrollmentCamera() {
     });
 
     statusText.textContent = 'Loading Face-API models offline...';
-    await initIdentityEngine();
+    await initIdentityEngine((msg) => {
+      if (statusText) statusText.textContent = msg;
+    });
     statusText.textContent = 'Engine Ready - Align face in guide';
 
     // Start Realtime Detection Feedback

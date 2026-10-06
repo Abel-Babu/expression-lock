@@ -37,22 +37,28 @@ export async function initIdentityEngine(onProgress) {
 
   const MODEL_URI = './models';
   try {
-    await Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URI),
-      faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URI),
-      faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URI)
-    ]);
+    // Load models sequentially to avoid choking the local single-threaded Python server
+    if (onProgress) onProgress('Loading Tiny Face Detector...');
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URI);
+    
+    if (onProgress) onProgress('Loading Landmark Detector...');
+    await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URI);
+    
+    if (onProgress) onProgress('Loading Recognition Model...');
+    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URI);
+
     modelsLoaded = true;
-    if (onProgress) onProgress('Models loaded');
+    if (onProgress) onProgress('Models loaded successfully');
     return faceapi;
   } catch (err) {
     console.warn('Face-API local model load fallback:', err);
     // Try standard landmarks if tiny not loaded
     try {
+      if (onProgress) onProgress('Trying fallback models...');
       await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URI);
       await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URI);
       modelsLoaded = true;
-      if (onProgress) onProgress('Models loaded');
+      if (onProgress) onProgress('Fallback models loaded');
       return faceapi;
     } catch (e) {
       console.error('Fatal error loading identity models:', e);
