@@ -93,3 +93,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
   }
 });
+
+chrome.action.onClicked.addListener((tab) => {
+  if (tab.url.includes("meet.google.com")) {
+    chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_OVERLAY' });
+  }
+});
