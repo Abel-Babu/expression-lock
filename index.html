@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Expression Lock (Phase 0)</title>
+  <title>Expression Lock</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,6 +16,20 @@
   <main id="app-view">
     <!-- View content injected here by app.js -->
   </main>
+
+  <!-- Expression Lock Modal (Hidden by default) -->
+  <div id="modal-overlay" class="hidden">
+    <div class="modal-content" id="el-modal">
+      <div class="modal-header">
+        <span class="modal-title">Expression Lock: Action Gate</span>
+        <button id="close-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body" id="el-modal-body">
+        <p>Zero-Trust Biometric Engine loading...</p>
+        <!-- Phase 2 will inject the camera and face mesh here -->
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="app.js"></script>
 </body>

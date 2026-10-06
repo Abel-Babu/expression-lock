@@ -1,7 +1,7 @@
-// Phase 0 Hash Router
+import { renderPortal } from './src/portal.js';
+import './src/modal.js';
 
 const views = {
-  '#/portal': '<h2>Treasury Portal (Checkpoint 2)</h2><p>Pending transaction mock goes here.</p>',
   '#/org': '<h2>Org Console</h2><p>Roster, policies, and enrollment go here.</p>',
   '#/host': '<h2>Host Panel (Checkpoint 1)</h2><p>Meeting verification controls go here.</p>',
   '#/participant': '<h2>Participant View</h2><p>Local tile that runs challenges when requested.</p>',
@@ -19,20 +19,22 @@ const views = {
 };
 
 function renderView() {
-  const hash = window.location.hash || '#/engine';
+  const hash = window.location.hash || '#/portal';
   const appView = document.getElementById('app-view');
   
-  // Basic rendering
-  appView.innerHTML = views[hash] || '<h2>404 - View Not Found</h2>';
-
   // Highlight nav
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
   const activeNav = document.querySelector(`nav a[href="${hash}"]`);
   if (activeNav) activeNav.classList.add('active');
 
-  // Trigger engine checks if on the engine view
-  if (hash === '#/engine') {
-    runEngineChecks();
+  // Render view
+  if (hash === '#/portal') {
+    renderPortal(appView);
+  } else if (views[hash]) {
+    appView.innerHTML = views[hash];
+    if (hash === '#/engine') runEngineChecks();
+  } else {
+    appView.innerHTML = '<h2>404 - View Not Found</h2>';
   }
 }
 
@@ -45,17 +47,14 @@ async function runEngineChecks() {
     }
   };
 
-  // 1. Check Camera
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     updateStatus('status-cam', true);
     stream.getTracks().forEach(t => t.stop());
   } catch (err) {
     updateStatus('status-cam', false);
-    console.error('Camera check failed:', err);
   }
 
-  // Check models (Mocking the loading for Phase 0 just to prove files exist)
   try {
     const res = await fetch('./vendor/face_landmarker.task', { method: 'HEAD' });
     updateStatus('status-face', res.ok);

@@ -1,6 +1,7 @@
 :root {
   --bg-dark: #0f172a;
   --bg-panel: #1e293b;
+  --bg-card: #0b1120;
   --text-main: #f8fafc;
   --text-muted: #94a3b8;
   --emerald: #10b981;
@@ -11,11 +12,7 @@
   --glass-border: rgba(255, 255, 255, 0.1);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -35,58 +32,80 @@ nav {
   gap: 1.5rem;
   border-bottom: 1px solid var(--glass-border);
 }
-
-nav a {
-  color: var(--text-muted);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-nav a:hover, nav a.active {
-  color: var(--cyan);
-}
+nav a { color: var(--text-muted); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+nav a:hover, nav a.active { color: var(--cyan); }
 
 /* Main Container */
-main {
-  flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
-}
+main { flex: 1; padding: 2rem; overflow-y: auto; transition: filter 0.3s ease; }
+main.blurred { filter: blur(8px); pointer-events: none; }
 
 .panel {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  padding: 2rem;
-  backdrop-filter: blur(10px);
-  max-width: 800px;
-  margin: 0 auto;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: 8px; padding: 2rem; backdrop-filter: blur(10px);
+  max-width: 800px; margin: 0 auto;
 }
 
-h1, h2, h3 {
-  margin-bottom: 1rem;
-}
+/* Portal Specific */
+.portal-header { text-align: center; margin-bottom: 2rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem;}
+.portal-header h1 { color: var(--text-main); font-weight: 300; letter-spacing: 1px; }
+.tx-card { background: var(--bg-card); border-radius: 8px; border: 1px solid var(--glass-border); overflow: hidden; margin-bottom: 2rem; }
+.session-strip { padding: 0.75rem 1rem; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); }
+.session-strip.unverified { background: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--amber); }
+.session-strip.verified { background: rgba(16, 185, 129, 0.1); border-left: 4px solid var(--emerald); }
+.tx-details { padding: 2rem; }
+.tx-details h2 { color: var(--text-main); font-size: 2rem; margin: 0.5rem 0 1.5rem 0;}
+.tx-row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; color: var(--text-muted); }
+.tx-row span:last-child { color: var(--text-main); font-weight: 500; }
 
-.status-list {
-  list-style: none;
-  margin-top: 1rem;
+/* Buttons */
+.btn-action {
+  width: 100%; padding: 1.25rem; font-size: 1.1rem; font-weight: bold;
+  border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+  text-transform: uppercase; letter-spacing: 1px;
 }
+.btn-locked { background: var(--amber); color: #000; cursor: not-allowed; }
+.btn-ready { background: var(--cyan); color: #000; box-shadow: 0 0 15px rgba(6, 182, 212, 0.4); }
+.btn-ready:hover { background: #08cadd; box-shadow: 0 0 25px rgba(6, 182, 212, 0.6); }
+.btn-frozen { background: var(--crimson); color: white; cursor: not-allowed; }
+.btn-authorized { background: var(--emerald); color: white; cursor: default; }
 
-.status-list li {
-  padding: 0.75rem;
-  border-bottom: 1px solid var(--glass-border);
-  display: flex;
-  justify-content: space-between;
+/* Audit Log */
+.audit-log { margin-top: 2rem; background: var(--bg-panel); border-radius: 6px; }
+.audit-log summary { padding: 1rem; cursor: pointer; font-weight: bold; border-bottom: 1px solid var(--glass-border); }
+.audit-content { padding: 1rem; font-family: monospace; font-size: 0.85rem; color: var(--text-muted); }
+.audit-content p { padding: 0.5rem 0; border-bottom: 1px dashed var(--glass-border); }
+
+/* Debug Controls */
+.debug-controls { margin-top: 2rem; padding: 1rem; border: 1px dashed var(--cyan); border-radius: 6px; font-size: 0.85rem; }
+.debug-controls h4 { color: var(--cyan); margin-bottom: 0.5rem; }
+.debug-controls label { margin-right: 1rem; cursor: pointer; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000; opacity: 1; transition: opacity 0.3s ease;
 }
-
-.badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.875rem;
-  font-weight: bold;
+.modal-overlay.hidden { opacity: 0; pointer-events: none; }
+.modal-content {
+  background: var(--bg-panel); border: 1px solid var(--glass-border);
+  border-radius: 12px; width: 90%; max-width: 600px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
 }
+.modal-header {
+  padding: 1rem 1.5rem; border-bottom: 1px solid var(--glass-border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(0,0,0,0.2);
+}
+.modal-title { font-weight: bold; color: var(--cyan); }
+.close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+.close-btn:hover { color: white; }
+.modal-body { padding: 2rem; text-align: center; min-height: 300px; display: flex; align-items: center; justify-content: center;}
 
+/* Helpers */
+.badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem; font-weight: bold; }
 .badge.success { background: var(--emerald); color: white; }
 .badge.pending { background: var(--amber); color: black; }
 .badge.error { background: var(--crimson); color: white; }
