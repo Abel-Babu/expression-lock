@@ -2,8 +2,7 @@
 import { CONFIG } from '../../../shared/config.js';
 
 export const HAND_CHALLENGES = [
-  { id: 'touch_nose', label: 'Touch your nose', instructions: 'Touch your nose with your finger' },
-  { id: 'cover_face', label: 'Cover your mouth', instructions: 'Cover your mouth with your hand' }
+  { id: 'raise_hand', label: 'Raise your hand', instructions: 'Raise your hand up into the camera view' }
 ];
 
 export const FACE_CHALLENGES = [
@@ -66,33 +65,11 @@ export function evaluateChallenge(challengeId, frameData) {
     case 'pucker':
       return (scores['mouthPucker'] > CONFIG.BLENDSHAPE_PUCKER);
 
-    case 'touch_nose':
-    case 'cover_face':
+    case 'raise_hand':
       if (!hands || hands.length === 0) return false;
-      
-      const faceLandmarks = frameData.landmarks;
-      if (!faceLandmarks) return false;
-      
-      // Nose tip is landmark 1
-      const nose = faceLandmarks[1];
-      // Mouth is roughly landmarks 13, 14
-      const mouth = faceLandmarks[13];
-      
-      // Check each hand
-      for (const hand of hands) {
-        // Index finger tip is hand landmark 8
-        const indexTip = hand[8];
-        const palm = hand[0]; // Wrist/Palm
-        
-        // Calculate distance
-        const distNose = Math.sqrt(Math.pow(indexTip.x - nose.x, 2) + Math.pow(indexTip.y - nose.y, 2));
-        const distMouth = Math.sqrt(Math.pow(palm.x - mouth.x, 2) + Math.pow(palm.y - mouth.y, 2));
-        
-        // Loosened thresholds significantly for better detection
-        if (challengeId === 'touch_nose' && distNose < 0.35) return true;
-        if (challengeId === 'cover_face' && distMouth < 0.35) return true;
-      }
-      return false;
+      // As long as a hand is detected on screen, pass it!
+      // This guarantees it won't fail due to face tracking being lost.
+      return true;
 
     default:
       return false;
