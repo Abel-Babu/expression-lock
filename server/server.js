@@ -35,9 +35,48 @@ wss.on('connection', (ws) => {
           }
           
           const meeting = meetings.get(currentMeetingId);
-          meeting.participants.set(currentParticipantId, { ws, status: 'PENDING' });
+          meeting.participants.set(currentParticipantId, { ws, status: 'PENDING', isHost: data.isHost || false });
           
           console.log(`[Server] Participant ${currentParticipantId} joined ${currentMeetingId}`);
+          break;
+
+        case 'ARM_MEETING':
+          const mToArm = meetings.get(currentMeetingId);
+          if (mToArm) {
+            const caller = mToArm.participants.get(currentParticipantId);
+            if (caller && caller.isHost) {
+              console.log(`[Server] Host ${currentParticipantId} ARMED meeting ${currentMeetingId}`);
+              
+              // Broadcast that the meeting is armed
+              mToArm.participants.forEach(p => {
+                p.ws.send(JSON.stringify({ type: 'MEETING_ARMED' }));
+              });
+
+              // Cryptographic Scheduler (Simplified for Phase 3)
+              // Schedule 2 random checks between 10-30 seconds for the demo
+              const delays = [
+                Math.floor(Math.random() * 10000) + 5000, 
+                Math.floor(Math.random() * 20000) + 15000
+              ];
+
+              delays.forEach((delay, index) => {
+                setTimeout(() => {
+                  console.log(`[Server] Firing Check ${index + 1} for ${currentMeetingId}`);
+                  const nonce = generateNonce();
+                  mToArm.participants.forEach(p => {
+                    p.status = 'PENDING';
+                    p.ws.send(JSON.stringify({
+                      type: 'SERVER_ROUND_START',
+                      nonce: nonce,
+                      round: index + 1
+                    }));
+                  });
+                }, delay);
+              });
+            } else {
+              ws.send(JSON.stringify({ type: 'ERROR', message: 'Only the host can arm the meeting' }));
+            }
+          }
           break;
           
         case 'VERIFICATION_RESULT':

@@ -1,6 +1,17 @@
 // src/content/index.js - Google Meet Overlay Injector
 
 let isChecking = false;
+let meetingId = window.location.pathname.replace('/', '') || 'test-meeting';
+let participantId = 'user-' + Math.floor(Math.random() * 10000); // Mock participant ID
+let isHost = true; // For demo purposes, pretend we are the host
+
+// Tell background to join
+chrome.runtime.sendMessage({
+  type: 'JOIN_MEETING_REQ',
+  meetingId,
+  participantId,
+  isHost
+});
 
 function injectOverlay() {
   const container = document.createElement('div');
@@ -11,7 +22,6 @@ function injectOverlay() {
   container.style.width = '300px';
   container.style.height = '400px';
   container.style.zIndex = '999999';
-  container.style.display = 'none';
   document.body.appendChild(container);
 
   const shadow = container.attachShadow({ mode: 'closed' });
@@ -32,7 +42,11 @@ function injectOverlay() {
       font-family: sans-serif;
     }
     .header { padding: 10px; background: #f59e0b; color: black; font-weight: bold; text-align: center; }
-    iframe { flex: 1; border: none; }
+    iframe { flex: 1; border: none; display: none; }
+    .dashboard { padding: 15px; display: flex; flex-direction: column; gap: 10px; flex: 1;}
+    button { padding: 10px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #2563eb; }
+    .status { font-size: 14px; color: #9ca3af; }
   `;
   shadow.appendChild(style);
 
@@ -41,8 +55,28 @@ function injectOverlay() {
 
   const header = document.createElement('div');
   header.className = 'header';
-  header.innerText = 'Verification Check';
+  header.innerText = 'Expression Lock';
   overlay.appendChild(header);
+
+  // Dashboard View
+  const dashboard = document.createElement('div');
+  dashboard.className = 'dashboard';
+  
+  const statusTxt = document.createElement('div');
+  statusTxt.className = 'status';
+  statusTxt.innerText = 'Status: UNARMED';
+  dashboard.appendChild(statusTxt);
+
+  const armBtn = document.createElement('button');
+  armBtn.innerText = 'ARM MEETING';
+  armBtn.onclick = () => {
+    chrome.runtime.sendMessage({ type: 'ARM_MEETING_REQ' });
+    armBtn.innerText = 'ARMING...';
+    armBtn.disabled = true;
+  };
+  dashboard.appendChild(armBtn);
+  
+  overlay.appendChild(dashboard);
 
   // Inject Engine Sandbox
   const iframe = document.createElement('iframe');
@@ -52,20 +86,23 @@ function injectOverlay() {
 
   shadow.appendChild(overlay);
 
-  return { container, iframe, header };
+  return { container, iframe, header, dashboard, statusTxt, armBtn };
 }
 
 // Global state
-let overlayUI = null;
+let overlayUI = injectOverlay();
 
 // Listen for messages from the Service Worker (Background)
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'TRIGGER_VERIFICATION') {
+  if (message.type === 'MEETING_ARMED') {
+    overlayUI.statusTxt.innerText = 'Status: ARMED (Checks scheduled)';
+    overlayUI.armBtn.style.display = 'none';
+  } else if (message.type === 'TRIGGER_VERIFICATION') {
     if (isChecking) return;
     isChecking = true;
 
-    if (!overlayUI) overlayUI = injectOverlay();
-    overlayUI.container.style.display = 'block';
+    overlayUI.dashboard.style.display = 'none';
+    overlayUI.iframe.style.display = 'block';
     overlayUI.header.innerText = 'Verification Check...';
 
     // Forward the command to the isolated iframe engine
@@ -73,6 +110,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       type: 'START_VERIFICATION',
       payload: { challengeCount: 2, nonce: message.nonce }
     }, '*');
+  } else if (message.type === 'TRUST_LEVEL_UPDATED') {
+    overlayUI.statusTxt.innerText = `Trust Level: ${message.payload.level}`;
   }
 });
 
