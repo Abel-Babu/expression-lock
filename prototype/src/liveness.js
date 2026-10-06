@@ -7,13 +7,11 @@ export const HAND_CHALLENGES = [
 ];
 
 export const FACE_CHALLENGES = [
-  { id: 'smile', label: 'Smile brightly', instructions: 'Please smile for the camera' },
-  { id: 'mouth_open', label: 'Open your mouth', instructions: 'Open your mouth wide' },
-  { id: 'blink_eyes', label: 'Blink your eyes', instructions: 'Blink both eyes slowly' },
-  { id: 'eyebrows_up', label: 'Raise your eyebrows', instructions: 'Raise both eyebrows' },
-  { id: 'pucker', label: 'Pucker your lips', instructions: 'Pucker your lips like a kiss' },
-  { id: 'turn_left', label: 'Turn your head left', instructions: 'Turn your head to the left' },
-  { id: 'turn_right', label: 'Turn your head right', instructions: 'Turn your head to the right' }
+  { id: 'mar_mouth_open', label: 'Open your mouth wide', instructions: 'Open your mouth to test 3D Jaw Depth' },
+  { id: 'ear_blink', label: 'Blink slowly', instructions: 'Blink to test 3D Eyelid Physics' },
+  { id: 'big_turn_left', label: 'Turn your head 40° left', instructions: 'Deep turn left to expose 2D deepfake warps' },
+  { id: 'big_turn_right', label: 'Turn your head 40° right', instructions: 'Deep turn right to expose 2D deepfake warps' },
+  { id: 'nose_wiggle', label: 'Wiggle your nose', instructions: 'Move your nose side-to-side rapidly' }
 ];
 
 // Fallback for single random challenge (if needed)
@@ -53,33 +51,58 @@ export function evaluateChallenge(challengeId, frameData) {
   });
 
   switch (challengeId) {
-    case 'smile':
-      return (scores['mouthSmileLeft'] > CONFIG.BLENDSHAPE_SMILE && scores['mouthSmileRight'] > CONFIG.BLENDSHAPE_SMILE);
+    case 'mar_mouth_open':
+      if (!frameData.landmarks) return false;
+      // MAR (Mouth Aspect Ratio) = height / width
+      const lipTop = frameData.landmarks[13];
+      const lipBot = frameData.landmarks[14];
+      const mouthLeft = frameData.landmarks[61];
+      const mouthRight = frameData.landmarks[291];
+      const mHeight = Math.sqrt(Math.pow(lipBot.x - lipTop.x, 2) + Math.pow(lipBot.y - lipTop.y, 2));
+      const mWidth = Math.sqrt(Math.pow(mouthRight.x - mouthLeft.x, 2) + Math.pow(mouthRight.y - mouthLeft.y, 2));
+      return (mHeight / mWidth) > 0.6; // Deepfake 2D stretches usually max out around 0.4
       
-    case 'mouth_open':
-      return (scores['jawOpen'] > CONFIG.BLENDSHAPE_JAW_OPEN); 
-      
-    case 'blink_eyes':
-      return (scores['eyeBlinkLeft'] > CONFIG.BLENDSHAPE_BLINK && scores['eyeBlinkRight'] > CONFIG.BLENDSHAPE_BLINK);
-      
-    case 'eyebrows_up':
-      return (scores['browInnerUp'] > CONFIG.BLENDSHAPE_BROW_UP);
-      
-    case 'pucker':
-      return (scores['mouthPucker'] > CONFIG.BLENDSHAPE_PUCKER);
-      
-    case 'turn_left':
-    case 'turn_right':
+    case 'ear_blink':
+      if (!frameData.landmarks) return false;
+      // EAR (Eye Aspect Ratio) = height / width
+      const eyeTop = frameData.landmarks[159];
+      const eyeBot = frameData.landmarks[145];
+      const eyeLeft = frameData.landmarks[33];
+      const eyeRight = frameData.landmarks[133];
+      const eHeight = Math.sqrt(Math.pow(eyeBot.x - eyeTop.x, 2) + Math.pow(eyeBot.y - eyeTop.y, 2));
+      const eWidth = Math.sqrt(Math.pow(eyeRight.x - eyeLeft.x, 2) + Math.pow(eyeRight.y - eyeLeft.y, 2));
+      return (eHeight / eWidth) < 0.1; // Strict fully-closed eye check
+
+    case 'big_turn_left':
+    case 'big_turn_right':
       if (!matrixes) return false;
-      // matrixes is a 4x4 array. Yaw is roughly Math.atan2(matrixes[8], matrixes[10]) or matrixes[0], matrixes[2] depending on format.
-      // But we can approximate yaw from the blendshapes `eyeLookInLeft`, `eyeLookOutRight`, etc., 
-      // or easier: just use the raw matrix. MediaPipe matrix: index 0,2 holds yaw info.
-      // We will simplify and use eye look direction as a proxy for head turn in this basic logic if matrix is too complex.
-      if (challengeId === 'turn_right') {
-        return (scores['eyeLookOutLeft'] > 0.4 && scores['eyeLookInRight'] > 0.4);
+      // Extract Yaw from 4x4 facial transformation matrix
+      // MediaPipe matrixes: m[0] and m[2] represent rotation for Yaw
+      const yaw = Math.atan2(-matrixes[2], matrixes[0]) * (180 / Math.PI);
+      
+      // If camera is mirrored, right/left might be flipped visually, but mathematically:
+      if (challengeId === 'big_turn_right') {
+        return yaw > 40; // True 40-degree turn
       } else {
-        return (scores['eyeLookInLeft'] > 0.4 && scores['eyeLookOutRight'] > 0.4);
+        return yaw < -40; // True 40-degree turn
       }
+      
+    case 'nose_wiggle':
+      if (!frameData.landmarks) return false;
+      const curNose = frameData.landmarks[1].x;
+      // To measure wiggle, we track delta over time
+      if (!window.lastNoseXs) window.lastNoseXs = [];
+      window.lastNoseXs.push(curNose);
+      if (window.lastNoseXs.length > 30) window.lastNoseXs.shift(); // keep last 30 frames
+      
+      const minNose = Math.min(...window.lastNoseXs);
+      const maxNose = Math.max(...window.lastNoseXs);
+      // Nose moved at least 15% of the screen horizontally within 30 frames
+      if ((maxNose - minNose) > 0.15) {
+        window.lastNoseXs = [];
+        return true;
+      }
+      return false;
 
     case 'touch_nose':
     case 'cover_face':
