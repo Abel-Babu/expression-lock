@@ -220,7 +220,7 @@ function handleServerEvent(payload) {
   }
   
   if (payload.type === 'ROUND_REQUEST') {
-    if (!amIHost) {
+    hostPanel.classList.add('hidden'); if(true) {
       participantCard.classList.remove('hidden');
     }
     // Background notification
@@ -233,7 +233,7 @@ function handleServerEvent(payload) {
     participantCard.classList.add('hidden');
     challengeView.classList.remove('hidden');
     // Tell engine to run attempt
-    sendToEngine('RUN_ATTEMPT', { challengeCount: 2, nonce: payload.nonce });
+    setTimeout(() => { sendToEngine('RUN_ATTEMPT', { challengeCount: 2, nonce: payload.nonce }); }, 500);
   }
 
   if (payload.type === 'ATTEMPT_RESULT') {

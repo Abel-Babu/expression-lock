@@ -146,6 +146,34 @@
       "email": "dummy-id-8852@example.com",
       "role": "host_eligible",
       "status": "Enrolled"
+    },
+    "dummy-id-6043": {
+      "id": "dummy-id-6043",
+      "name": "Test 6043",
+      "email": "dummy-id-6043@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "dummy-id-3628": {
+      "id": "dummy-id-3628",
+      "name": "Test 3628",
+      "email": "dummy-id-3628@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "dummy-id-6257": {
+      "id": "dummy-id-6257",
+      "name": "Test 6257",
+      "email": "dummy-id-6257@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "06de9852-bddd-4c7a-af09-9d577682987c": {
+      "id": "06de9852-bddd-4c7a-af09-9d577682987c",
+      "name": "abelxavi2",
+      "email": "abelxavi2@gmail.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
     }
   },
   "invites": {},
