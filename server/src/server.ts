@@ -159,7 +159,7 @@ wss.on('connection', (ws, req) => {
           break;
         }
 
-        case 'START_ROUND': {
+        case 'START_ROUND': { console.log('[Server] START_ROUND received from ' + member.name);
           if (!currentMeetingId) break;
           const m = meetings.get(currentMeetingId)!;
           if (m.hostId !== member.id) {

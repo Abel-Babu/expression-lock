@@ -195,8 +195,8 @@ window.addEventListener('message', async (event) => {
         payload: { nonce: event.data.payload.nonce, result }
       });
     }
-    // Also notify UI
-    window.parent.postMessage({ type: 'ATTEMPT_RESULT', payload: result }, '*');
+    
+    
   } else if (event.data && event.data.type === 'CONNECT_WS') {
     const { url, token, meetingCode } = event.data.payload;
     if (wsManager) wsManager.disconnect();

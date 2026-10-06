@@ -111,6 +111,34 @@
       "email": "abelxavi@gmail.com",
       "role": "host_eligible",
       "status": "Enrolled"
+    },
+    "55a684b4-29b8-42c0-8429-6b7cfc832df5": {
+      "id": "55a684b4-29b8-42c0-8429-6b7cfc832df5",
+      "name": "abelxavi2",
+      "email": "abelxavi2@gmail.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "36901a41-202f-47d4-b8be-809b152ebde0": {
+      "id": "36901a41-202f-47d4-b8be-809b152ebde0",
+      "name": "abelxavi2",
+      "email": "abelxavi2@gmail.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "dummy-id-7989": {
+      "id": "dummy-id-7989",
+      "name": "Test 7989",
+      "email": "dummy-id-7989@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "dummy-id-3676": {
+      "id": "dummy-id-3676",
+      "name": "Test 3676",
+      "email": "dummy-id-3676@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
     }
   },
   "invites": {},
