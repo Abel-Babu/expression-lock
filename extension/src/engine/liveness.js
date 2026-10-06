@@ -2,7 +2,8 @@
 import { CONFIG } from '../../../shared/config.js';
 
 export const HAND_CHALLENGES = [
-  { id: 'raise_hand', label: 'Raise your hand', instructions: 'Raise your hand up into the camera view' }
+  { id: 'touch_nose', label: 'Touch your nose', instructions: 'Touch your nose with your finger' },
+  { id: 'cover_face', label: 'Cover your mouth', instructions: 'Cover your mouth with your hand' }
 ];
 
 export const FACE_CHALLENGES = [
@@ -38,38 +39,74 @@ export function generateChallengeSequence(count = 2) {
   return sequence;
 }
 
+// Cache the last known face landmarks so hand challenges work even if the hand temporarily obscures the face (dropping face tracking)
+let lastKnownFaceLandmarks = null;
+
 // Evaluate blendshapes and hands to see if they pass the target challenge
 export function evaluateChallenge(challengeId, frameData) {
   const { blendshapes, hands, matrixes } = frameData;
-  if (!blendshapes || !blendshapes.categories) return false;
+  
+  if (frameData.landmarks && frameData.landmarks.length > 0) {
+    lastKnownFaceLandmarks = frameData.landmarks;
+  }
 
   // Convert blendshapes array to a key-value map for easy lookup
   const scores = {};
-  blendshapes.categories.forEach(b => {
-    scores[b.categoryName] = b.score;
-  });
+  if (blendshapes && blendshapes.categories) {
+    blendshapes.categories.forEach(b => {
+      scores[b.categoryName] = b.score;
+    });
+  }
 
   switch (challengeId) {
     case 'smile':
+      if (!blendshapes) return false;
       return (scores['mouthSmileLeft'] > CONFIG.BLENDSHAPE_SMILE && scores['mouthSmileRight'] > CONFIG.BLENDSHAPE_SMILE);
       
     case 'mouth_open':
+      if (!blendshapes) return false;
       return (scores['jawOpen'] > CONFIG.BLENDSHAPE_JAW_OPEN); 
       
     case 'blink_eyes':
+      if (!blendshapes) return false;
       return (scores['eyeBlinkLeft'] > CONFIG.BLENDSHAPE_BLINK && scores['eyeBlinkRight'] > CONFIG.BLENDSHAPE_BLINK);
       
     case 'eyebrows_up':
+      if (!blendshapes) return false;
       return (scores['browInnerUp'] > CONFIG.BLENDSHAPE_BROW_UP);
       
     case 'pucker':
+      if (!blendshapes) return false;
       return (scores['mouthPucker'] > CONFIG.BLENDSHAPE_PUCKER);
 
-    case 'raise_hand':
+    case 'touch_nose':
+    case 'cover_face':
       if (!hands || hands.length === 0) return false;
-      // As long as a hand is detected on screen, pass it!
-      // This guarantees it won't fail due to face tracking being lost.
-      return true;
+      
+      // Use cached face landmarks if current frame's face tracking is obscured
+      const faceLandmarks = frameData.landmarks || lastKnownFaceLandmarks;
+      if (!faceLandmarks) return false;
+      
+      // Nose tip is landmark 1
+      const nose = faceLandmarks[1];
+      // Mouth is roughly landmarks 13, 14
+      const mouth = faceLandmarks[13];
+      
+      // Check each hand
+      for (const hand of hands) {
+        // Index finger tip is hand landmark 8
+        const indexTip = hand[8];
+        const palm = hand[0]; // Wrist/Palm
+        
+        // Calculate distance
+        const distNose = Math.sqrt(Math.pow(indexTip.x - nose.x, 2) + Math.pow(indexTip.y - nose.y, 2));
+        const distMouth = Math.sqrt(Math.pow(palm.x - mouth.x, 2) + Math.pow(palm.y - mouth.y, 2));
+        
+        // Use very generous distance threshold so it easily registers
+        if (challengeId === 'touch_nose' && distNose < 0.25) return true;
+        if (challengeId === 'cover_face' && distMouth < 0.25) return true;
+      }
+      return false;
 
     default:
       return false;
