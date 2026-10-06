@@ -94,9 +94,8 @@ main.blurred { filter: blur(8px); pointer-events: none; }
 .debug-controls h4 { color: var(--cyan); margin-bottom: 0.5rem; }
 .debug-controls label { margin-right: 1rem; cursor: pointer; }
 
-/* Modal */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 1; transition: opacity 0.3s ease; }
-.modal-overlay.hidden { opacity: 0; pointer-events: none; }
+#modal-overlay, .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 1; transition: opacity 0.2s ease; }
+#modal-overlay.hidden, .modal-overlay.hidden, .hidden { display: none !important; opacity: 0 !important; pointer-events: none !important; }
 .modal-content { background: var(--bg-panel); border: 1px solid var(--glass-border); border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); overflow: hidden; }
 .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); }
 .modal-title { font-weight: bold; color: var(--cyan); }

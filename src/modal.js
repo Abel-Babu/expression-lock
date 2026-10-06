@@ -1,19 +1,30 @@
 export function openModal() {
   const overlay = document.getElementById('modal-overlay');
   const mainView = document.getElementById('app-view');
-  if (overlay) overlay.classList.remove('hidden');
-  if (mainView) mainView.classList.add('blurred');
+  if (overlay) {
+    overlay.classList.remove('hidden');
+    overlay.style.display = 'flex';
+  }
+  if (mainView) {
+    mainView.classList.add('blurred');
+  }
 }
 
 export function closeModal() {
   const overlay = document.getElementById('modal-overlay');
   const mainView = document.getElementById('app-view');
-  if (overlay) overlay.classList.add('hidden');
-  if (mainView) mainView.classList.remove('blurred');
+  if (overlay) {
+    overlay.classList.add('hidden');
+    overlay.style.display = 'none';
+  }
+  if (mainView) {
+    mainView.classList.remove('blurred');
+  }
 }
 
 // Expose globally for inline fallback
 window.closeModal = closeModal;
+window.openModal = openModal;
 
 function initModal() {
   const closeBtn = document.getElementById('close-modal-btn');
@@ -25,7 +36,6 @@ function initModal() {
     };
   }
 
-  // Also close if clicking outside modal box (on dark backdrop)
   const overlay = document.getElementById('modal-overlay');
   if (overlay) {
     overlay.onclick = (e) => {
