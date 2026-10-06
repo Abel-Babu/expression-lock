@@ -27,7 +27,7 @@ export async function initVisionEngine(onStatusChange) {
   if (onStatusChange) onStatusChange('initializing');
 
   try {
-    const { FilesetResolver, FaceLandmarker } = await getVisionTasks();
+    const { FilesetResolver, FaceLandmarker, HandLandmarker } = await getVisionTasks();
     
     // Resolve WASM loader
     try {
@@ -50,6 +50,20 @@ export async function initVisionEngine(onStatusChange) {
       runningMode: 'VIDEO',
       numFaces: 1
     });
+
+    // Load HandLandmarker
+    try {
+      window.handLandmarker = await HandLandmarker.createFromOptions(visionFileset, {
+        baseOptions: {
+          modelAssetPath: './vendor/hand_landmarker.task',
+          delegate: 'GPU'
+        },
+        runningMode: 'VIDEO',
+        numHands: 2
+      });
+    } catch (e) {
+      console.error('HandLandmarker failed to load:', e);
+    }
 
     isInitializing = false;
     if (onStatusChange) onStatusChange('ready');
@@ -100,6 +114,11 @@ export async function startCameraAndTracking(videoEl, canvasEl, onFrameCallback)
         lastVideoTime = videoEl.currentTime;
         const startTimeMs = performance.now();
         const results = faceLandmarker.detectForVideo(videoEl, startTimeMs);
+        
+        let handResults = null;
+        if (window.handLandmarker) {
+          handResults = window.handLandmarker.detectForVideo(videoEl, startTimeMs);
+        }
 
         // Clear canvas
         ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
@@ -108,11 +127,23 @@ export async function startCameraAndTracking(videoEl, canvasEl, onFrameCallback)
           const landmarks = results.faceLandmarks[0];
           drawMesh(ctx, landmarks, canvasEl.width, canvasEl.height);
 
+          // If hands detected, draw a simple point on the palm
+          if (handResults && handResults.landmarks && handResults.landmarks.length > 0) {
+            ctx.fillStyle = '#f59e0b';
+            for (const hand of handResults.landmarks) {
+              const palm = hand[0];
+              ctx.beginPath();
+              ctx.arc(palm.x * canvasEl.width, palm.y * canvasEl.height, 5, 0, 2 * Math.PI);
+              ctx.fill();
+            }
+          }
+
           if (onFrameCallback) {
             onFrameCallback({
               landmarks,
               blendshapes: results.faceBlendshapes ? results.faceBlendshapes[0] : null,
-              matrixes: results.facialTransformationMatrixes ? results.facialTransformationMatrixes[0] : null
+              matrixes: results.facialTransformationMatrixes ? results.facialTransformationMatrixes[0] : null,
+              hands: handResults ? handResults.landmarks : null
             });
           }
         }
