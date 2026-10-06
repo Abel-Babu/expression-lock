@@ -14,7 +14,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/index.js-DqxHAvO2.js"
+        "assets/index.js-CvbpxxTW.js"
       ],
       "matches": [
         "*://meet.google.com/*"
@@ -38,7 +38,7 @@
         "src/engine/engine.html",
         "vendor/*",
         "models/*",
-        "assets/index.js-DqxHAvO2.js"
+        "assets/index.js-CvbpxxTW.js"
       ],
       "use_dynamic_url": false
     }

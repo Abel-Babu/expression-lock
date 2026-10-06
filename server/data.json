@@ -90,6 +90,27 @@
       "email": "abelxavi2@gmail.com",
       "role": "host_eligible",
       "status": "Enrolled"
+    },
+    "80db2f8c-3bfc-4678-9c14-d89d9c4cbf7c": {
+      "id": "80db2f8c-3bfc-4678-9c14-d89d9c4cbf7c",
+      "name": "abelx",
+      "email": "abelx@gmail.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "dummy-id-5285": {
+      "id": "dummy-id-5285",
+      "name": "Test 5285",
+      "email": "dummy-id-5285@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "d605981e-eda7-4acf-8b63-fbfafe7867be": {
+      "id": "d605981e-eda7-4acf-8b63-fbfafe7867be",
+      "name": "abelxavi",
+      "email": "abelxavi@gmail.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
     }
   },
   "invites": {},

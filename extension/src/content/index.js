@@ -262,6 +262,16 @@ function handleServerEvent(payload) {
         <p>You may return to the meeting.</p>
       `;
       setTimeout(() => participantCard.classList.add('hidden'), 3000);
+    } else if (payload.status === 'PENDING') {
+      participantCard.classList.remove('hidden');
+      participantCard.innerHTML = `
+        <h2>Technical Error</h2>
+        <p style="color:#ef4444">${payload.reason || 'Camera or Database failed to load.'}</p>
+        <button id="btn-begin-attempt" class="btn-danger">Try Again</button>
+      `;
+      shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
+        sendToEngine('WS_SEND', { type: 'BEGIN_ATTEMPT' });
+      };
     }
   }
 

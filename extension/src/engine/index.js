@@ -29,7 +29,7 @@ async function runAttempt({ challengeCount = 2, nonce = '' }) {
     // Load local enrolled face
     const targetEmbedding = await loadIdentityTemplate();
     if (!targetEmbedding) {
-      return { status: 'FAILED', reason: 'IdentityMismatch', details: 'No face enrolled' };
+      isBusy = false; return { status: 'FAILED', reason: 'IdentityMismatch', details: 'No face enrolled' };
     }
     
     // Create elements
