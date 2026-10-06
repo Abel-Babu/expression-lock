@@ -354,7 +354,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 window.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'CHALLENGE_UPDATED') {
     const payload = event.data.payload;
+    overlayUI.instructionBar.style.background = '#3b82f6'; // Reset to blue
     overlayUI.instructionBar.innerText = `(${payload.index + 1}/${payload.total}) ${payload.instructions}`;
+  } else if (event.data && event.data.type === 'EXPRESSION_PASSED') {
+    overlayUI.instructionBar.style.background = '#10b981'; // Turn green!
+    overlayUI.instructionBar.innerText = 'Action Detected! Extracting Identity...';
   } else if (event.data && event.data.type === 'VERIFICATION_RESULT') {
     isChecking = false;
     overlayUI.dashboard.style.display = 'flex';
