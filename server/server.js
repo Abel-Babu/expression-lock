@@ -23,6 +23,14 @@ wss.on('connection', (ws) => {
       
       switch (data.type) {
         case 'JOIN_MEETING':
+          // Clean up any ghost participant from previous page refreshes on the same WebSocket
+          if (currentMeetingId && currentParticipantId) {
+            const oldM = meetings.get(currentMeetingId);
+            if (oldM) {
+              oldM.participants.delete(currentParticipantId);
+            }
+          }
+
           currentMeetingId = data.meetingId;
           currentParticipantId = data.participantId;
           
@@ -65,6 +73,7 @@ wss.on('connection', (ws) => {
                   const nonce = generateNonce();
                   mToArm.participants.forEach(p => {
                     p.status = 'PENDING';
+                    p.currentNonce = nonce;
                     p.ws.send(JSON.stringify({
                       type: 'SERVER_ROUND_START',
                       nonce: nonce,
@@ -75,6 +84,23 @@ wss.on('connection', (ws) => {
               });
             } else {
               ws.send(JSON.stringify({ type: 'ERROR', message: 'Only the host can arm the meeting' }));
+            }
+          }
+          break;
+
+        case 'REQUEST_MANUAL_CHECK':
+          const mCheck = meetings.get(currentMeetingId);
+          if (mCheck) {
+            const p = mCheck.participants.get(currentParticipantId);
+            if (p) {
+              const nonce = generateNonce();
+              p.status = 'PENDING';
+              p.currentNonce = nonce;
+              p.ws.send(JSON.stringify({
+                type: 'SERVER_ROUND_START',
+                nonce: nonce,
+                round: 1
+              }));
             }
           }
           break;
