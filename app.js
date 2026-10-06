@@ -2,7 +2,11 @@ import { renderPortal } from './src/portal.js';
 import { renderOrgConsole } from './src/orgView.js';
 import { renderHostPanel } from './src/hostView.js';
 import { renderParticipantTile } from './src/participantView.js';
+import { initHotkeys } from './src/hotkeys.js';
 import './src/modal.js';
+
+// Initialize the presentation hotkeys globally
+initHotkeys();
 
 const views = {
   '#/engine': `
