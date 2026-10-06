@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Phase 1 Spikes - Expression Lock",
+  "version": "1.0",
+  "description": "Throwaway spikes to derisk WebAssembly and Camera injections.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "*://meet.google.com/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["engine.html"],
+      "matches": ["*://meet.google.com/*"]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://meet.google.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
