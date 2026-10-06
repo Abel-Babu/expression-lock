@@ -52,7 +52,7 @@ export function evaluateChallenge(challengeId, frameData) {
       // But we can approximate yaw from the blendshapes `eyeLookInLeft`, `eyeLookOutRight`, etc., 
       // or easier: just use the raw matrix. MediaPipe matrix: index 0,2 holds yaw info.
       // We will simplify and use eye look direction as a proxy for head turn in this basic logic if matrix is too complex.
-      if (challengeId === 'turn_left') {
+      if (challengeId === 'turn_right') {
         return (scores['eyeLookOutLeft'] > 0.4 && scores['eyeLookInRight'] > 0.4);
       } else {
         return (scores['eyeLookInLeft'] > 0.4 && scores['eyeLookOutRight'] > 0.4);
