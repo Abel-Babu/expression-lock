@@ -1,0 +1,99 @@
+{
+  "members": {
+    "93b6eaf1-e93f-403a-a1e5-a71691340379": {
+      "id": "42735f3e-012c-4023-8197-9a70ad6f76a6",
+      "name": "Alice",
+      "email": "alice@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "8b425278-f537-4986-8a2f-52f1e3b20614": {
+      "id": "8b425278-f537-4986-8a2f-52f1e3b20614",
+      "name": "Alice",
+      "email": "alice@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "45b0dd10-34e9-4a7f-a71c-0ac25f93c5f5": {
+      "id": "45b0dd10-34e9-4a7f-a71c-0ac25f93c5f5",
+      "name": "Host",
+      "email": "host@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "7db5ba8e-fab0-4077-9f39-de6abfbc8956": {
+      "id": "7db5ba8e-fab0-4077-9f39-de6abfbc8956",
+      "name": "User",
+      "email": "user@example.com",
+      "role": "member",
+      "status": "Enrolled"
+    },
+    "e6bee91f-b06d-47bb-aac4-4004ace5074a": {
+      "id": "e6bee91f-b06d-47bb-aac4-4004ace5074a",
+      "name": "Host",
+      "email": "host@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "412a87c5-6cca-4de8-91df-a8b7521fb79f": {
+      "id": "412a87c5-6cca-4de8-91df-a8b7521fb79f",
+      "name": "User",
+      "email": "user@example.com",
+      "role": "member",
+      "status": "Enrolled"
+    },
+    "4bc7f8db-011d-4b9a-a670-490291532cd4": {
+      "id": "4bc7f8db-011d-4b9a-a670-490291532cd4",
+      "name": "Host",
+      "email": "host@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "5ab53c59-ebb0-42e1-9978-f2170f195cf6": {
+      "id": "5ab53c59-ebb0-42e1-9978-f2170f195cf6",
+      "name": "User",
+      "email": "user@example.com",
+      "role": "member",
+      "status": "Enrolled"
+    },
+    "d4d2533d-65b7-45e3-a405-e1e2ac07386e": {
+      "id": "d4d2533d-65b7-45e3-a405-e1e2ac07386e",
+      "name": "Host",
+      "email": "host@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "160c6948-02ea-4373-8838-62c1743c8061": {
+      "id": "160c6948-02ea-4373-8838-62c1743c8061",
+      "name": "User",
+      "email": "user@example.com",
+      "role": "member",
+      "status": "Enrolled"
+    },
+    "dummy-id-3956": {
+      "id": "dummy-id-3956",
+      "name": "Test 3956",
+      "email": "dummy-id-3956@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "dummy-id-2803": {
+      "id": "dummy-id-2803",
+      "name": "Test 2803",
+      "email": "dummy-id-2803@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    },
+    "c9b67665-ccd6-4d19-b3f2-7f5154e4c896": {
+      "id": "c9b67665-ccd6-4d19-b3f2-7f5154e4c896",
+      "name": "abelxavi2",
+      "email": "abelxavi2@gmail.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
+    }
+  },
+  "invites": {},
+  "domainAllowlist": [
+    "example.com"
+  ]
+}

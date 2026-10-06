@@ -1,395 +1,295 @@
-// src/content/index.js - Google Meet Overlay Injector
+import { TabSyncManager } from './tabSync.js';
 
-let isChecking = false;
-let meetingId = window.location.pathname.replace('/', '') || 'test-meeting';
-let participantId = 'user-' + Math.floor(Math.random() * 10000); // Mock participant ID
-let isHost = true; // For demo purposes, pretend we are the host
-let verificationResults = [];
+let shadowRoot = null;
+let container = null;
+let meetingCode = '';
 
-// Tell background to join
-chrome.runtime.sendMessage({
-  type: 'JOIN_MEETING_REQ',
-  meetingId,
-  participantId,
-  isHost
-});
+// UI Elements
+let idlePill, hostPanel, participantCard, challengeView, resultsView;
+let wsStateStr = 'DISCONNECTED';
+let amIHost = false;
+let myMemberId = 'dummy-id'; // Replaced by actual token in Phase 6
 
-function injectOverlay() {
-  const container = document.createElement('div');
-  container.id = 'expression-lock-container';
-  container.style.position = 'fixed';
-  container.style.top = '20px';
-  container.style.right = '20px';
-  container.style.width = '320px';
-  container.style.height = '420px';
-  container.style.zIndex = '999999';
-  container.style.transition = 'width 0.3s, height 0.3s';
-  document.body.appendChild(container);
+function injectShadowDOM() {
+  const host = document.createElement('div');
+  host.id = 'expression-lock-host';
+  host.style.position = 'fixed';
+  host.style.top = '0';
+  host.style.left = '0';
+  host.style.width = '100%';
+  host.style.height = '100%';
+  host.style.pointerEvents = 'none'; // Click through by default
+  host.style.zIndex = '999999';
+  document.body.appendChild(host);
 
-  const shadow = container.attachShadow({ mode: 'closed' });
-
-  // Add styles
+  shadowRoot = host.attachShadow({ mode: 'closed' });
+  
   const style = document.createElement('style');
   style.textContent = `
-    * { box-sizing: border-box; }
-    .overlay {
-      width: 100%;
-      height: 100%;
-      background: rgba(23, 23, 23, 0.95);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
-      display: flex;
-      flex-direction: column;
-      color: #e5e5e5;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      overflow: hidden;
-      transition: all 0.3s;
-    }
-    .overlay.minimized {
-      height: 52px !important;
-      width: 200px !important;
-    }
-    .header { 
-      padding: 14px 16px; 
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.02)); 
-      border-bottom: 1px solid rgba(245, 158, 11, 0.2);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      user-select: none;
-      cursor: grab;
-    }
-    .header:active { cursor: grabbing; }
-    .header-title {
-      font-weight: 600; 
-      font-size: 14px;
-      color: #f59e0b;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .header-controls { display: flex; gap: 4px; }
-    .control-btn {
-      background: none; border: none; color: #a3a3a3; cursor: pointer;
-      font-size: 16px; padding: 4px; line-height: 1; border-radius: 4px; transition: all 0.2s;
-    }
-    .control-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+    .panel { pointer-events: auto; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 8px; padding: 16px; font-family: sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .hidden { display: none !important; }
+    button { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 8px; }
+    button:hover { background: #2563eb; }
+    .btn-danger { background: #ef4444; }
+    #idle-pill { position: fixed; top: 16px; left: 16px; width: auto; padding: 8px 16px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    #host-panel { position: fixed; top: 60px; left: 16px; width: 300px; }
+    #participant-card { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 350px; text-align: center; }
+    #challenge-view { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 680px; text-align: center; }
+    #results-view { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; }
     
-    .instruction-bar {
-      display: none;
-      background: #3b82f6;
-      color: white;
-      padding: 12px;
-      text-align: center;
-      font-weight: 600;
-      font-size: 15px;
-      animation: slideDown 0.3s ease-out;
-    }
-    @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .status-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+    .bg-green { background: #10b981; }
+    .bg-red { background: #ef4444; }
+    .bg-yellow { background: #f59e0b; }
+    .bg-gray { background: #64748b; }
     
-    iframe { flex: 1; border: none; display: none; background: #000; width: 100%; height: 100%; }
-    
-    .dashboard, .results-view { padding: 20px; display: flex; flex-direction: column; gap: 16px; flex: 1; overflow-y: auto; }
-    .results-view { display: none; }
-    
-    .status-card {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .status-label { font-size: 12px; color: #a3a3a3; text-transform: uppercase; letter-spacing: 0.5px; }
-    .status-value { font-size: 16px; font-weight: 600; color: #10b981; }
-    .status-value.unarmed { color: #f59e0b; }
-    .action-group {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: auto;
-    }
-    button.primary-btn { 
-      padding: 14px; background: #3b82f6; color: white; border: none; 
-      border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s;
-    }
-    button.primary-btn:hover:not(:disabled) { background: #2563eb; }
-    button.secondary-btn {
-      padding: 14px; background: rgba(255, 255, 255, 0.05); color: #e5e5e5; 
-      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; 
-      cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s;
-    }
-    button.secondary-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); }
-    
-    .result-item {
-      background: rgba(255,255,255,0.05);
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      font-size: 13px;
-    }
-    .result-item.success { border-left: 4px solid #10b981; }
-    .result-item.fail { border-left: 4px solid #ef4444; }
-    
-    .overlay.minimized .dashboard, .overlay.minimized .results-view, .overlay.minimized iframe, .overlay.minimized .instruction-bar { display: none !important; }
+    iframe { width: 640px; height: 480px; border: none; border-radius: 8px; background: black; }
   `;
-  shadow.appendChild(style);
+  shadowRoot.appendChild(style);
 
-  const overlay = document.createElement('div');
-  overlay.className = 'overlay';
-
-  // Header
-  const header = document.createElement('div');
-  header.className = 'header';
-  
-  const headerTitle = document.createElement('div');
-  headerTitle.className = 'header-title';
-  headerTitle.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Expression Lock`;
-  header.appendChild(headerTitle);
-
-  const headerControls = document.createElement('div');
-  headerControls.className = 'header-controls';
-  
-  const minBtn = document.createElement('button');
-  minBtn.className = 'control-btn';
-  minBtn.innerHTML = '−';
-  minBtn.title = 'Minimize';
-  minBtn.onclick = (e) => {
-    e.stopPropagation();
-    if (overlay.classList.contains('minimized')) {
-      overlay.classList.remove('minimized');
-      minBtn.innerHTML = '−';
-    } else {
-      overlay.classList.add('minimized');
-      minBtn.innerHTML = '+';
-    }
+  // 1. Idle Pill
+  idlePill = document.createElement('div');
+  idlePill.id = 'idle-pill';
+  idlePill.className = 'panel';
+  idlePill.innerHTML = `<strong>Expression Lock</strong> <span id="ws-badge" class="status-badge bg-gray">Connecting...</span>`;
+  idlePill.onclick = () => {
+    if (hostPanel.classList.contains('hidden')) hostPanel.classList.remove('hidden');
+    else hostPanel.classList.add('hidden');
   };
+  shadowRoot.appendChild(idlePill);
 
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'control-btn';
-  closeBtn.innerHTML = '✕';
-  closeBtn.title = 'Close (Background)';
-  closeBtn.onclick = (e) => {
-    e.stopPropagation();
-    container.style.display = 'none';
-  };
+  // 2. Host Panel
+  hostPanel = document.createElement('div');
+  hostPanel.id = 'host-panel';
+  hostPanel.className = 'panel hidden';
+  hostPanel.innerHTML = `
+    <h3>Host Panel</h3>
+    <button id="btn-claim-host">Claim Host</button>
+    <div id="host-controls" class="hidden">
+      <button id="btn-start-standard">Start Standard Check (2)</button>
+      <button id="btn-start-strict">Start Strict Check (3)</button>
+    </div>
+    <h4>Participants</h4>
+    <div id="participant-list"></div>
+  `;
+  shadowRoot.appendChild(hostPanel);
 
-  headerControls.appendChild(minBtn);
-  headerControls.appendChild(closeBtn);
-  header.appendChild(headerControls);
-  overlay.appendChild(header);
+  // 3. Participant Card
+  participantCard = document.createElement('div');
+  participantCard.id = 'participant-card';
+  participantCard.className = 'panel hidden';
+  participantCard.innerHTML = `
+    <h2>Verification Requested</h2>
+    <p>The host has requested a biometric verification.</p>
+    <button id="btn-begin-attempt">Begin (45s)</button>
+  `;
+  shadowRoot.appendChild(participantCard);
 
-  // Draggable Header Logic
-  let isDragging = false;
-  let dragStartX, dragStartY;
-  let initialLeft, initialTop;
+  // 4. Challenge View (Contains engine iframe)
+  challengeView = document.createElement('div');
+  challengeView.id = 'challenge-view';
+  challengeView.className = 'panel hidden';
+  challengeView.innerHTML = `
+    <h2 id="cv-title">Get Ready</h2>
+    <p id="cv-inst">Looking for face...</p>
+    <iframe id="engine-iframe" src="${chrome.runtime.getURL('src/engine/engine.html')}"></iframe>
+  `;
+  shadowRoot.appendChild(challengeView);
 
-  header.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.control-btn')) return; // Ignore buttons
-    isDragging = true;
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-    const rect = container.getBoundingClientRect();
-    initialLeft = rect.left;
-    initialTop = rect.top;
-    
-    // Switch from right/bottom to left/top to avoid layout jumping
-    container.style.right = 'auto';
-    container.style.bottom = 'auto';
-    container.style.left = initialLeft + 'px';
-    container.style.top = initialTop + 'px';
-  });
+  // 5. Results View
+  resultsView = document.createElement('div');
+  resultsView.id = 'results-view';
+  resultsView.className = 'panel hidden';
+  resultsView.innerHTML = `
+    <h2>Round Results</h2>
+    <div id="rv-list"></div>
+    <button id="btn-close-results">Close</button>
+  `;
+  shadowRoot.appendChild(resultsView);
 
-  window.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    const dx = e.clientX - dragStartX;
-    const dy = e.clientY - dragStartY;
-    container.style.left = (initialLeft + dx) + 'px';
-    container.style.top = (initialTop + dy) + 'px';
-  });
-
-  window.addEventListener('mouseup', () => {
-    isDragging = false;
-  });
-
-  // Instruction Bar
-  const instructionBar = document.createElement('div');
-  instructionBar.className = 'instruction-bar';
-  overlay.appendChild(instructionBar);
-
-  // Dashboard View
-  const dashboard = document.createElement('div');
-  dashboard.className = 'dashboard';
-  
-  const statusCard = document.createElement('div');
-  statusCard.className = 'status-card';
-  
-  const statusLabel = document.createElement('div');
-  statusLabel.className = 'status-label';
-  statusLabel.innerText = 'System Status';
-  statusCard.appendChild(statusLabel);
-  
-  const statusTxt = document.createElement('div');
-  statusTxt.className = 'status-value unarmed';
-  statusTxt.innerText = 'Standing By';
-  statusCard.appendChild(statusTxt);
-  
-  dashboard.appendChild(statusCard);
-
-  const actionGroup = document.createElement('div');
-  actionGroup.className = 'action-group';
-
-  const manualBtn = document.createElement('button');
-  manualBtn.className = 'primary-btn';
-  manualBtn.innerText = 'Start Verification Check';
-  manualBtn.onclick = () => {
-    chrome.runtime.sendMessage({ type: 'MANUAL_CHECK_REQ' });
-  };
-  actionGroup.appendChild(manualBtn);
-
-  const resultsBtn = document.createElement('button');
-  resultsBtn.className = 'secondary-btn';
-  resultsBtn.innerText = 'View Results';
-  resultsBtn.onclick = () => {
-    dashboard.style.display = 'none';
-    resultsView.style.display = 'flex';
-  };
-  actionGroup.appendChild(resultsBtn);
-  
-  dashboard.appendChild(actionGroup);
-  overlay.appendChild(dashboard);
-
-  // Results View
-  const resultsView = document.createElement('div');
-  resultsView.className = 'results-view';
-  
-  const resultsList = document.createElement('div');
-  resultsList.style.flex = '1';
-  resultsList.style.overflowY = 'auto';
-  resultsList.innerHTML = '<div style="color:#a3a3a3;text-align:center;margin-top:20px;">No checks run yet</div>';
-  resultsView.appendChild(resultsList);
-
-  const backBtn = document.createElement('button');
-  backBtn.className = 'secondary-btn';
-  backBtn.innerText = 'Back to Dashboard';
-  backBtn.onclick = () => {
-    resultsView.style.display = 'none';
-    dashboard.style.display = 'flex';
-  };
-  resultsView.appendChild(backBtn);
-  
-  overlay.appendChild(resultsView);
-
-  // Inject Engine Sandbox
-  const iframeContainer = document.createElement('div');
-  iframeContainer.style.flex = '1';
-  iframeContainer.style.position = 'relative';
-  iframeContainer.style.display = 'none';
-
-  const iframe = document.createElement('iframe');
-  iframe.src = chrome.runtime.getURL('src/engine/engine.html');
-  iframe.allow = 'camera';
-  iframeContainer.appendChild(iframe);
-  overlay.appendChild(iframeContainer);
-
-  shadow.appendChild(overlay);
-
-  return { container, overlay, iframeContainer, iframe, headerTitle, dashboard, resultsView, resultsList, statusTxt, instructionBar };
+  bindEvents();
 }
 
-// Global state
-let overlayUI = injectOverlay();
-
-function updateResultsList() {
-  if (verificationResults.length === 0) {
-    overlayUI.resultsList.innerHTML = '<div style="color:#a3a3a3;text-align:center;margin-top:20px;">No checks run yet</div>';
-    return;
-  }
-  overlayUI.resultsList.innerHTML = '';
-  verificationResults.forEach((res, i) => {
-    const d = document.createElement('div');
-    d.className = 'result-item ' + (res.status === 'VERIFIED' ? 'success' : 'fail');
-    d.innerHTML = `<strong>Check #${i + 1}</strong>: ${res.status}<br><span style="color:#a3a3a3;font-size:11px;">${new Date(res.time).toLocaleTimeString()}</span>`;
-    overlayUI.resultsList.prepend(d);
-  });
+function bindEvents() {
+  shadowRoot.getElementById('btn-claim-host').onclick = () => {
+    sendToEngine('WS_SEND', { type: 'CLAIM_HOST' });
+  };
+  shadowRoot.getElementById('btn-start-standard').onclick = () => {
+    sendToEngine('WS_SEND', { type: 'START_ROUND', payload: { type: 'STANDARD' } });
+  };
+  shadowRoot.getElementById('btn-start-strict').onclick = () => {
+    sendToEngine('WS_SEND', { type: 'START_ROUND', payload: { type: 'STRICT' } });
+  };
+  shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
+    sendToEngine('WS_SEND', { type: 'BEGIN_ATTEMPT' });
+  };
+  shadowRoot.getElementById('btn-close-results').onclick = () => {
+    resultsView.classList.add('hidden');
+  };
 }
 
-// Listen for messages from the Service Worker (Background)
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'TOGGLE_OVERLAY') {
-    overlayUI.container.style.display = overlayUI.container.style.display === 'none' ? 'block' : 'none';
-  } else if (message.type === 'TRIGGER_VERIFICATION') {
-    if (isChecking) return;
-    isChecking = true;
-
-    // Force open if minimized or hidden
-    overlayUI.overlay.classList.remove('minimized');
-    overlayUI.container.style.display = 'block';
-    
-    overlayUI.dashboard.style.display = 'none';
-    overlayUI.resultsView.style.display = 'none';
-    overlayUI.iframeContainer.style.display = 'block';
-    overlayUI.iframe.style.display = 'block';
-    
-    overlayUI.instructionBar.style.display = 'block';
-    overlayUI.instructionBar.innerText = 'Initializing Camera...';
-
-    overlayUI.headerTitle.innerText = 'Verification In Progress...';
-    overlayUI.headerTitle.style.color = '#3b82f6';
-
-    // Forward the command to the isolated iframe engine
-    overlayUI.iframe.contentWindow.postMessage({
-      type: 'START_VERIFICATION',
-      payload: { challengeCount: 2, nonce: message.nonce }
-    }, '*');
-  } else if (message.type === 'TRUST_LEVEL_UPDATED') {
-    overlayUI.statusTxt.innerText = `Trust Level: ${message.payload.level}`;
+function sendToEngine(type, payload) {
+  const iframe = shadowRoot.getElementById('engine-iframe');
+  if (iframe && iframe.contentWindow) {
+    iframe.contentWindow.postMessage({ type, payload }, '*');
   }
-});
+}
 
-// Listen for messages FROM the iframe engine
-window.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'CHALLENGE_UPDATED') {
-    const payload = event.data.payload;
-    overlayUI.instructionBar.style.background = '#3b82f6'; // Reset to blue
-    overlayUI.instructionBar.innerText = `(${payload.index + 1}/${payload.total}) ${payload.instructions}`;
-  } else if (event.data && event.data.type === 'EXPRESSION_PASSED') {
-    overlayUI.instructionBar.style.background = '#10b981'; // Turn green!
-    overlayUI.instructionBar.innerText = 'Action Detected! Extracting Identity...';
-  } else if (event.data && event.data.type === 'VERIFICATION_RESULT') {
-    isChecking = false;
-    overlayUI.dashboard.style.display = 'flex';
-    overlayUI.iframeContainer.style.display = 'none';
-    overlayUI.instructionBar.style.display = 'none';
-    overlayUI.headerTitle.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Expression Lock`;
-    overlayUI.headerTitle.style.color = '#f59e0b';
-    
-    verificationResults.push({ status: event.data.payload.status, time: Date.now() });
-    updateResultsList();
+// Extract meeting ID from Meet URL
+function getMeetingCode() {
+  const path = window.location.pathname;
+  if (path && path.length > 1) {
+    return path.substring(1).split('?')[0]; // e.g. "abc-defg-hij"
+  }
+  return 'test-meeting';
+}
 
-    // Relay to background
-    chrome.runtime.sendMessage({
-      type: 'VERIFICATION_COMPLETE',
-      payload: event.data.payload
+function init() {
+  meetingCode = getMeetingCode();
+  injectShadowDOM();
+  
+  // Wait for iframe to load, then connect WS
+  const iframe = shadowRoot.getElementById('engine-iframe');
+  iframe.onload = () => {
+    chrome.storage.local.get(['serverUrl', 'memberToken'], (res) => {
+      const url = res.serverUrl || 'ws://localhost:3000';
+      myMemberId = res.memberToken || 'dummy-id-' + Math.floor(Math.random()*10000);
+      sendToEngine('CONNECT_WS', { url, token: myMemberId, meetingCode });
     });
-  } else if (event.data && event.data.type === 'VERIFICATION_ERROR') {
-    isChecking = false;
-    overlayUI.dashboard.style.display = 'flex';
-    overlayUI.iframeContainer.style.display = 'none';
-    overlayUI.instructionBar.style.display = 'none';
-    overlayUI.headerTitle.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Expression Lock`;
-    overlayUI.headerTitle.style.color = '#ef4444'; // Red header
-    
-    // Show error on dashboard
-    overlayUI.statusTxt.innerText = 'Error: ' + event.data.payload;
-    overlayUI.statusTxt.style.color = '#ef4444';
-    
-    verificationResults.push({ status: 'FAILED: ' + event.data.payload, time: Date.now() });
-    updateResultsList();
-    
-    console.error('Liveness Check Failed:', event.data.payload);
+  };
+
+  // Tab Sync to prevent duplicate WS connections
+  new TabSyncManager(meetingCode, (state) => {
+    if (state === 'PASSIVE') {
+      idlePill.innerHTML = `<strong>Expression Lock</strong> <span class="status-badge bg-yellow">Passive Tab</span>`;
+      sendToEngine('WS_SEND', { type: 'DISCONNECT' }); // Actually engine/index.js doesn't handle DISCONNECT yet, we just ignore for now
+    }
+  });
+}
+
+// Listen to messages from Engine
+window.addEventListener('message', (event) => {
+  if (!event.origin.startsWith('chrome-extension://')) return;
+  const msg = event.data;
+  
+  if (msg.type === 'WS_STATE') {
+    const badge = shadowRoot.getElementById('ws-badge');
+    badge.innerText = msg.payload;
+    if (msg.payload === 'CONNECTED') badge.className = 'status-badge bg-green';
+    else badge.className = 'status-badge bg-red';
+  }
+  
+  if (msg.type === 'SERVER_EVENT') {
+    handleServerEvent(msg.payload);
+  }
+
+  // Engine challenge updates
+  if (msg.type === 'READINESS_STEP') {
+    shadowRoot.getElementById('cv-title').innerText = 'Readiness Check';
+    shadowRoot.getElementById('cv-inst').innerText = msg.payload.message;
+  }
+  if (msg.type === 'COUNTDOWN_START') {
+    shadowRoot.getElementById('cv-title').innerText = 'Get Ready!';
+    shadowRoot.getElementById('cv-inst').innerText = 'Starting in 3...';
+  }
+  if (msg.type === 'CHALLENGE_UPDATED') {
+    shadowRoot.getElementById('cv-title').innerText = `Task ${msg.payload.index + 1} / ${msg.payload.total}`;
+    shadowRoot.getElementById('cv-inst').innerText = msg.payload.instructions;
+    shadowRoot.getElementById('cv-title').style.color = 'white';
+  }
+  if (msg.type === 'EXPRESSION_PASSED') {
+    shadowRoot.getElementById('cv-title').innerText = `Success!`;
+    shadowRoot.getElementById('cv-title').style.color = '#10b981';
+    shadowRoot.getElementById('cv-inst').innerText = 'Extracting Identity...';
   }
 });
+
+function handleServerEvent(payload) {
+  if (payload.type === 'MEETING_STATE') {
+    amIHost = (payload.hostId === myMemberId);
+    if (amIHost) {
+      shadowRoot.getElementById('btn-claim-host').classList.add('hidden');
+      shadowRoot.getElementById('host-controls').classList.remove('hidden');
+    } else {
+      shadowRoot.getElementById('btn-claim-host').classList.remove('hidden');
+      shadowRoot.getElementById('host-controls').classList.add('hidden');
+    }
+    
+    const list = shadowRoot.getElementById('participant-list');
+    list.innerHTML = payload.participants.map(p => `<div>${p} ${p===payload.hostId ? '(Host)' : ''}</div>`).join('');
+  }
+  
+  if (payload.type === 'ROUND_REQUEST') {
+    if (!amIHost) {
+      participantCard.classList.remove('hidden');
+    }
+    // Background notification
+    if (document.visibilityState === 'hidden') {
+      chrome.runtime.sendMessage({ type: 'SHOW_NOTIFICATION', message: `Verification requested by ${payload.hostName}` });
+    }
+  }
+  
+  if (payload.type === 'ATTEMPT_GRANTED') {
+    participantCard.classList.add('hidden');
+    challengeView.classList.remove('hidden');
+    // Tell engine to run attempt
+    sendToEngine('RUN_ATTEMPT', { challengeCount: 2, nonce: payload.nonce });
+  }
+
+  if (payload.type === 'ATTEMPT_RESULT') {
+    challengeView.classList.add('hidden');
+    if (payload.status === 'RETRYING') {
+      participantCard.classList.remove('hidden');
+      participantCard.innerHTML = `
+        <h2>Attempt Failed</h2>
+        <p>${payload.reason}</p>
+        <button id="btn-begin-attempt" class="btn-danger">Retry (${payload.attemptsLeft} left)</button>
+      `;
+      shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
+        sendToEngine('WS_SEND', { type: 'BEGIN_ATTEMPT' });
+      };
+    } else if (payload.status === 'FAILED') {
+      participantCard.classList.remove('hidden');
+      participantCard.innerHTML = `
+        <h2>Verification Failed</h2>
+        <p>No attempts remaining. The host has been notified.</p>
+      `;
+      setTimeout(() => participantCard.classList.add('hidden'), 5000);
+    } else if (payload.status === 'VERIFIED') {
+      participantCard.classList.remove('hidden');
+      participantCard.innerHTML = `
+        <h2 style="color:#10b981">Verified!</h2>
+        <p>You may return to the meeting.</p>
+      `;
+      setTimeout(() => participantCard.classList.add('hidden'), 3000);
+    }
+  }
+
+  if (payload.type === 'ROUND_RESULTS') {
+    resultsView.classList.remove('hidden');
+    const rv = shadowRoot.getElementById('rv-list');
+    rv.innerHTML = payload.summary.results.map(r => `
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+        <span>${r.name}</span>
+        <span class="status-badge ${r.status==='VERIFIED'?'bg-green':r.status==='FAILED'?'bg-red':'bg-gray'}">${r.status} (${r.attempts} tries)</span>
+      </div>
+    `).join('');
+  }
+  
+  if (payload.type === 'ROUND_PROGRESS') {
+    const list = shadowRoot.getElementById('participant-list');
+    list.innerHTML = payload.progress.map(p => `
+      <div style="display:flex; justify-content:space-between;">
+        <span>${p.memberId}</span>
+        <span>${p.status}</span>
+      </div>
+    `).join('');
+  }
+}
+
+// Start
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

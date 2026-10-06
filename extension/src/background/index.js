@@ -1,104 +1,30 @@
-// src/background/index.js - Service Worker
-let socket = null;
-let currentMeetingId = null;
-let currentParticipantId = null;
-
-function connectToServer() {
-  socket = new WebSocket('ws://localhost:3000');
-
-  socket.onopen = () => {
-    console.log('[Background] Connected to Session Server');
-    if (currentMeetingId && currentParticipantId) {
-      socket.send(JSON.stringify({
-        type: 'JOIN_MEETING',
-        meetingId: currentMeetingId,
-        participantId: currentParticipantId,
-        isHost: true // Simplified for demo
-      }));
-    }
-  };
-
-  socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    console.log('[Background] Received from server:', data);
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'SHOW_NOTIFICATION') {
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: '../options/icon128.png', // Fallback icon path
+      title: 'Expression Lock',
+      message: request.message,
+      priority: 2
+    });
     
-    if (data.type === 'SERVER_ROUND_START') {
-      // Ping content script to start a check
-      chrome.tabs.query({ url: '*://meet.google.com/*' }, (tabs) => {
-        tabs.forEach(tab => {
-          chrome.tabs.sendMessage(tab.id, {
-            type: 'TRIGGER_VERIFICATION',
-            nonce: data.nonce
-          });
-        });
-      });
-    } else if (data.type === 'MEETING_ARMED') {
-      chrome.tabs.query({ url: '*://meet.google.com/*' }, (tabs) => {
-        tabs.forEach(tab => chrome.tabs.sendMessage(tab.id, { type: 'MEETING_ARMED' }));
-      });
-    } else if (data.type === 'TRUST_LEVEL_UPDATED') {
-      chrome.tabs.query({ url: '*://meet.google.com/*' }, (tabs) => {
-        tabs.forEach(tab => chrome.tabs.sendMessage(tab.id, { type: 'TRUST_LEVEL_UPDATED', payload: data }));
-      });
-    }
-  };
-
-  socket.onclose = () => {
-    console.log('[Background] Disconnected. Reconnecting in 3s...');
-    setTimeout(connectToServer, 3000);
-  };
-}
-
-chrome.runtime.onInstalled.addListener(() => {
-  console.log('Extension installed.');
-});
-
-// Start connection
-connectToServer();
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'JOIN_MEETING_REQ') {
-    currentMeetingId = message.meetingId;
-    currentParticipantId = message.participantId;
+    // Set badge
+    chrome.action.setBadgeText({ text: '!' });
+    chrome.action.setBadgeBackgroundColor({ color: '#ef4444' });
     
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({
-        type: 'JOIN_MEETING',
-        meetingId: currentMeetingId,
-        participantId: currentParticipantId,
-        isHost: message.isHost
-      }));
-    }
-  } else if (message.type === 'ARM_MEETING_REQ') {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ type: 'ARM_MEETING' }));
-    }
-  } else if (message.type === 'MANUAL_CHECK_REQ') {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ type: 'REQUEST_MANUAL_CHECK' }));
-    } else {
-      chrome.tabs.query({ url: '*://meet.google.com/*' }, (tabs) => {
-        tabs.forEach(tab => {
-          chrome.tabs.sendMessage(tab.id, {
-            type: 'TRIGGER_VERIFICATION',
-            nonce: 'manual-nonce-' + Date.now()
-          });
-        });
-      });
-    }
-  } else if (message.type === 'VERIFICATION_COMPLETE') {
-    console.log('[Background] Relaying verified signed result to server:', message.payload);
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({
-        type: 'VERIFICATION_RESULT',
-        payload: message.payload
-      }));
-    }
+    // Auto-clear badge after 2 minutes
+    setTimeout(() => {
+      chrome.action.setBadgeText({ text: '' });
+    }, 120000);
   }
 });
 
-chrome.action.onClicked.addListener((tab) => {
-  if (tab.url.includes("meet.google.com")) {
-    chrome.tabs.sendMessage(tab.id, { type: 'TOGGLE_OVERLAY' });
-  }
+chrome.notifications.onClicked.addListener(() => {
+  // Try to find the Meet tab and focus it
+  chrome.tabs.query({ url: "*://meet.google.com/*" }, function(tabs) {
+    if (tabs.length > 0) {
+      chrome.tabs.update(tabs[0].id, { active: true });
+      chrome.windows.update(tabs[0].windowId, { focused: true });
+    }
+  });
 });

@@ -1,11 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Expression Lock - Options</title>
+  <title>Expression Lock - Enrollment</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; background: #0f172a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: #1e293b; padding: 40px; border-radius: 12px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); width: 400px; text-align: center; }
+    .hidden { display: none !important; }
+    input { width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 16px; }
+    button { width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #2563eb; }
+    button:disabled { background: #64748b; cursor: not-allowed; }
+    #video-container { width: 320px; height: 240px; margin: 0 auto 20px auto; background: black; border-radius: 8px; overflow: hidden; position: relative; }
+    video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+    .status { margin-top: 15px; font-size: 14px; min-height: 20px; }
+    .text-green { color: #10b981; }
+    .text-red { color: #ef4444; }
+  </style>
+  <script type="module" crossorigin src="/assets/index.html-DTnc--EM.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/store-tDnwlJgy.js">
 </head>
 <body>
-  <h1>Org Settings & Enrollment</h1>
-  <p>To be built in Phase 4.</p>
-  <script src="./index.js"></script>
+
+  <div id="auth-section" class="card">
+    <h2>Expression Lock</h2>
+    <p>Please enter your corporate email and the invite code provided by your admin.</p>
+    
+    <label style="display:block; text-align:left; margin-bottom:8px;">Email Address</label>
+    <input type="email" id="email" placeholder="alice@company.com">
+    
+    <label style="display:block; text-align:left; margin-bottom:8px;">Invite Code</label>
+    <input type="text" id="inviteCode" placeholder="e.g. 8f92a1">
+    
+    <label style="display:block; text-align:left; margin-bottom:8px;">Server URL</label>
+    <input type="text" id="serverUrl" value="http://localhost:3000">
+
+    <button id="btn-login">Authenticate</button>
+    <div id="auth-status" class="status text-red"></div>
+  </div>
+
+  <div id="enroll-section" class="card hidden">
+    <h2>Face Enrollment</h2>
+    <p>Please look directly at the camera to register your unique identity locally on this device.</p>
+    <div id="video-container">
+      <video id="enroll-video" autoplay playsinline muted></video>
+    </div>
+    <button id="btn-enroll" disabled>Initializing AI...</button>
+    <div id="enroll-status" class="status text-green"></div>
+  </div>
+
+  <div id="success-section" class="card hidden">
+    <h2 class="text-green">Identity Registered</h2>
+    <p>Your biometric template is securely stored on this device.</p>
+    <p>You can safely close this tab. The Expression Lock extension will automatically protect your Google Meet sessions.</p>
+    <br>
+    <button id="btn-reset" style="background:#ef4444">Reset & Clear Data</button>
+  </div>
+
 </body>
 </html>
