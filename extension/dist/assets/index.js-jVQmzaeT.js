@@ -33,7 +33,7 @@
   `,t.appendChild(s),l=document.createElement("div"),l.id="challenge-view",l.className="panel hidden",l.innerHTML=`
     <h2 id="cv-title">Get Ready</h2>
     <p id="cv-inst">Looking for face...</p>
-    <iframe id="engine-iframe" src="${chrome.runtime.getURL("src/engine/engine.html")}"></iframe>
+    <iframe id="engine-iframe" src="${chrome.runtime.getURL("src/engine/engine.html")}" allow="camera *; microphone *"></iframe>
   `,t.appendChild(l),r=document.createElement("div"),r.id="results-view",r.className="panel hidden",r.innerHTML=`
     <h2>Round Results</h2>
     <div id="rv-list"></div>

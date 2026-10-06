@@ -92,7 +92,7 @@ function injectShadowDOM() {
   challengeView.innerHTML = `
     <h2 id="cv-title">Get Ready</h2>
     <p id="cv-inst">Looking for face...</p>
-    <iframe id="engine-iframe" src="${chrome.runtime.getURL('src/engine/engine.html')}"></iframe>
+    <iframe id="engine-iframe" src="${chrome.runtime.getURL('src/engine/engine.html')}" allow="camera *; microphone *"></iframe>
   `;
   shadowRoot.appendChild(challengeView);
 
