@@ -57,7 +57,7 @@ export async function initVisionEngine(onStatusChange) {
       window.handLandmarker = await HandLandmarker.createFromOptions(visionFileset, {
         baseOptions: {
           modelAssetPath: chrome.runtime.getURL('vendor/hand_landmarker.task'),
-          delegate: 'GPU'
+          delegate: 'CPU' // CPU is much more stable for hand tracking on Windows Chrome
         },
         runningMode: 'VIDEO',
         numHands: 2

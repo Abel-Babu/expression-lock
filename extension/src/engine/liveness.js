@@ -89,8 +89,8 @@ export function evaluateChallenge(challengeId, frameData) {
         const distMouth = Math.sqrt(Math.pow(palm.x - mouth.x, 2) + Math.pow(palm.y - mouth.y, 2));
         
         // Loosened thresholds significantly for better detection
-        if (challengeId === 'touch_nose' && distNose < 0.20) return true;
-        if (challengeId === 'cover_face' && distMouth < 0.25) return true;
+        if (challengeId === 'touch_nose' && distNose < 0.35) return true;
+        if (challengeId === 'cover_face' && distMouth < 0.35) return true;
       }
       return false;
 
