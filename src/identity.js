@@ -1,6 +1,7 @@
 // src/identity.js - Offline Face-API 128D Biometric Descriptor Engine
 let faceApiLoaded = false;
 let modelsLoaded = false;
+let modelLoadPromise = null;
 
 // Dynamically ensure face-api script is injected into document
 export async function loadFaceApiScript() {
@@ -9,8 +10,9 @@ export async function loadFaceApiScript() {
   return new Promise((resolve, reject) => {
     const existing = document.querySelector('script[src*="face-api"]');
     if (existing) {
-      existing.onload = () => resolve(window.faceapi);
+      existing.addEventListener('load', () => resolve(window.faceapi));
       if (window.faceapi) return resolve(window.faceapi);
+      return;
     }
 
     const script = document.createElement('script');
@@ -31,40 +33,47 @@ export async function loadFaceApiScript() {
 // Load Face-API offline weights from ./models
 export async function initIdentityEngine(onProgress) {
   if (modelsLoaded) return window.faceapi;
-
-  if (onProgress) onProgress('Loading face recognition models...');
-  const faceapi = await loadFaceApiScript();
-
-  const MODEL_URI = './models';
-  try {
-    // Load models sequentially to avoid choking the local single-threaded Python server
-    if (onProgress) onProgress('Loading Tiny Face Detector...');
-    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URI);
-    
-    if (onProgress) onProgress('Loading Landmark Detector...');
-    await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URI);
-    
-    if (onProgress) onProgress('Loading Recognition Model...');
-    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URI);
-
-    modelsLoaded = true;
-    if (onProgress) onProgress('Models loaded successfully');
-    return faceapi;
-  } catch (err) {
-    console.warn('Face-API local model load fallback:', err);
-    // Try standard landmarks if tiny not loaded
-    try {
-      if (onProgress) onProgress('Trying fallback models...');
-      await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URI);
-      await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URI);
-      modelsLoaded = true;
-      if (onProgress) onProgress('Fallback models loaded');
-      return faceapi;
-    } catch (e) {
-      console.error('Fatal error loading identity models:', e);
-      throw e;
-    }
+  if (modelLoadPromise) {
+    if (onProgress) onProgress('Waiting for models to load...');
+    return modelLoadPromise;
   }
+
+  modelLoadPromise = (async () => {
+    if (onProgress) onProgress('Loading face recognition models...');
+    const faceapi = await loadFaceApiScript();
+
+    const MODEL_URI = './models';
+    try {
+      // Load models sequentially to avoid choking the local single-threaded Python server
+      if (onProgress) onProgress('Loading Tiny Face Detector...');
+      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URI);
+      
+      if (onProgress) onProgress('Loading Landmark Detector...');
+      await faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URI);
+      
+      if (onProgress) onProgress('Loading Recognition Model...');
+      await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URI);
+
+      modelsLoaded = true;
+      if (onProgress) onProgress('Models loaded successfully');
+      return faceapi;
+    } catch (err) {
+      console.warn('Face-API local model load fallback:', err);
+      try {
+        if (onProgress) onProgress('Trying fallback models...');
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URI);
+        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URI);
+        modelsLoaded = true;
+        if (onProgress) onProgress('Fallback models loaded');
+        return faceapi;
+      } catch (e) {
+        console.error('Fatal error loading identity models:', e);
+        throw e;
+      }
+    }
+  })();
+  
+  return modelLoadPromise;
 }
 
 // Extract a 128-dimensional Float32Array face embedding from a video or canvas element
