@@ -111,6 +111,10 @@ export async function startVerification({ challengeCount = 2, targetEmbedding = 
             }
           } catch (err) {
             console.error('Extraction error:', err);
+            // If the camera was stopped, we MUST resolve or reject to avoid hanging
+            if (currentChallengeIndex >= challengeCount) {
+               reject(err);
+            }
           } finally {
             isExtractingIdentity = false;
           }
@@ -133,10 +137,17 @@ function notifyHost(type, payload) {
 
 // Mock signature generation for Phase 2
 async function signResult(nonce, status) {
-  const msg = new TextEncoder().encode(`${nonce}:${status}:${Date.now()}`);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msg);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  try {
+    if (window.crypto && window.crypto.subtle) {
+      const msg = new TextEncoder().encode(`${nonce}:${status}:${Date.now()}`);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msg);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+  } catch (e) {
+    console.warn('Crypto error:', e);
+  }
+  return `fallback-sig-${nonce}-${Date.now()}`;
 }
 
 // Global listener for extension content script
