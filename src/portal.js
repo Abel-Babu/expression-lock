@@ -124,6 +124,23 @@ export function renderPortal(container) {
   const btn = document.getElementById('tx-action-btn');
   const strip = document.getElementById('portal-session-strip');
 
+  // Listen for the cross-tab signals
+  import('./signal.js').then(({ onSignal }) => {
+    onSignal((type, payload) => {
+      if (type === 'LIVENESS_SUCCESS') {
+        btn.className = 'btn-action btn-ready';
+        btn.textContent = '[ Authorize & Sign Wire Transfer ]';
+        strip.className = 'session-strip verified';
+        strip.innerHTML = `<span><strong>Session Status:</strong> Verified (Host: ${payload.userName})</span><span>29:45</span>`;
+      } else if (type === 'LIVENESS_FAILED') {
+        btn.className = 'btn-action btn-locked';
+        btn.textContent = 'Locked: verification failed';
+        strip.className = 'session-strip unverified';
+        strip.innerHTML = `<span><strong>Session Status:</strong> FAILED</span><span>--:--</span>`;
+      }
+    });
+  });
+
   // Handle the action button click
   btn.addEventListener('click', () => {
     if (btn.classList.contains('btn-ready')) {

@@ -1,10 +1,10 @@
 import { renderPortal } from './src/portal.js';
 import { renderOrgConsole } from './src/orgView.js';
+import { renderHostPanel } from './src/hostView.js';
+import { renderParticipantTile } from './src/participantView.js';
 import './src/modal.js';
 
 const views = {
-  '#/host': '<h2>Host Panel (Checkpoint 1)</h2><p>Meeting verification controls go here.</p>',
-  '#/participant': '<h2>Participant View</h2><p>Local tile that runs challenges when requested.</p>',
   '#/engine': `
     <div class="panel">
       <h2>Engine Status Check</h2>
@@ -32,6 +32,10 @@ function renderView() {
     renderPortal(appView);
   } else if (hash === '#/org') {
     renderOrgConsole(appView);
+  } else if (hash === '#/host') {
+    renderHostPanel(appView);
+  } else if (hash === '#/participant') {
+    renderParticipantTile(appView);
   } else if (views[hash]) {
     appView.innerHTML = views[hash];
     if (hash === '#/engine') runEngineChecks();
