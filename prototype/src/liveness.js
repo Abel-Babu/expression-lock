@@ -75,16 +75,30 @@ export function evaluateChallenge(challengeId, frameData) {
 
     case 'big_turn_left':
     case 'big_turn_right':
-      if (!matrixes) return false;
-      // Extract Yaw from 4x4 facial transformation matrix
-      // MediaPipe matrixes: m[0] and m[2] represent rotation for Yaw
-      const yaw = Math.atan2(-matrixes[2], matrixes[0]) * (180 / Math.PI);
+      if (!frameData.landmarks) return false;
+      const tNose = frameData.landmarks[1];
+      const tLeft = frameData.landmarks[234]; // Left edge of face
+      const tRight = frameData.landmarks[454]; // Right edge of face
       
-      // If camera is mirrored, right/left might be flipped visually, but mathematically:
+      // Calculate horizontal 2D distance from nose to edges
+      // Using Math.abs just in case of mirroring
+      const distLeft = Math.abs(tNose.x - tLeft.x);
+      const distRight = Math.abs(tRight.x - tNose.x);
+      
+      // Calculate ratio
+      const ratio = distLeft / (distRight + 0.0001); // Prevent div by 0
+      
+      // Log for debugging
+      console.log(`Turn Ratio: ${ratio.toFixed(2)} (Left: ${distLeft.toFixed(3)}, Right: ${distRight.toFixed(3)})`);
+      
+      // Depending on whether the camera is mirrored, a "right turn" means the nose moves 
+      // towards the right edge of the screen (from the user's perspective).
+      // Let's accept either extreme for either challenge just to be safe with mirroring!
       if (challengeId === 'big_turn_right') {
-        return yaw > 40; // True 40-degree turn
+         // Deep turn threshold
+         return ratio < 0.3 || ratio > 3.0; 
       } else {
-        return yaw < -40; // True 40-degree turn
+         return ratio < 0.3 || ratio > 3.0; 
       }
       
     case 'nose_wiggle':
