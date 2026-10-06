@@ -3,7 +3,7 @@ import { getUser } from './orgStore.js';
 import { sendSignal, onSignal } from './signal.js';
 import { initVisionEngine, startCameraAndTracking, stopCameraAndTracking } from './vision.js';
 import { initIdentityEngine, extractFaceEmbedding, computeEuclideanDistance, distanceToConfidence } from './identity.js';
-import { getRandomChallenge, evaluateChallenge } from './liveness.js';
+import { generateChallengeSequence, evaluateChallenge } from './liveness.js';
 import { CONFIG } from './config.js';
 
 export function renderParticipantTile(container) {
@@ -80,7 +80,7 @@ export function renderParticipantTile(container) {
       await initIdentityEngine();
       await initVisionEngine();
       
-      const challengesToRun = [getRandomChallenge(), getRandomChallenge()];
+      const challengesToRun = generateChallengeSequence(2);
       let currentChallengeIndex = 0;
       
       currentChallenge = challengesToRun[currentChallengeIndex];

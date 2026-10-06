@@ -1,21 +1,44 @@
 // src/liveness.js - Liveness Challenge Engine
 import { CONFIG } from './config.js';
 
-export const CHALLENGES = [
+export const HAND_CHALLENGES = [
+  { id: 'touch_nose', label: 'Touch your nose', instructions: 'Touch your nose with your finger' },
+  { id: 'cover_face', label: 'Cover your mouth', instructions: 'Cover your mouth with your hand' }
+];
+
+export const FACE_CHALLENGES = [
   { id: 'smile', label: 'Smile brightly', instructions: 'Please smile for the camera' },
   { id: 'mouth_open', label: 'Open your mouth', instructions: 'Open your mouth wide' },
   { id: 'blink_eyes', label: 'Blink your eyes', instructions: 'Blink both eyes slowly' },
   { id: 'eyebrows_up', label: 'Raise your eyebrows', instructions: 'Raise both eyebrows' },
   { id: 'pucker', label: 'Pucker your lips', instructions: 'Pucker your lips like a kiss' },
-  { id: 'touch_nose', label: 'Touch your nose', instructions: 'Touch your nose with your finger' },
-  { id: 'cover_face', label: 'Cover your mouth', instructions: 'Cover your mouth with your hand' },
   { id: 'turn_left', label: 'Turn your head left', instructions: 'Turn your head to the left' },
   { id: 'turn_right', label: 'Turn your head right', instructions: 'Turn your head to the right' }
 ];
 
+// Fallback for single random challenge (if needed)
 export function getRandomChallenge() {
-  const index = Math.floor(Math.random() * CHALLENGES.length);
-  return CHALLENGES[index];
+  const all = [...HAND_CHALLENGES, ...FACE_CHALLENGES];
+  return all[Math.floor(Math.random() * all.length)];
+}
+
+// Generate a sequence of challenges ensuring at least one involves the hand
+export function generateChallengeSequence(count = 2) {
+  const sequence = [];
+  
+  // Pick one random hand challenge
+  const handChallenge = HAND_CHALLENGES[Math.floor(Math.random() * HAND_CHALLENGES.length)];
+  // Pick random face challenges for the rest
+  const faceChallenge = FACE_CHALLENGES[Math.floor(Math.random() * FACE_CHALLENGES.length)];
+  
+  // Randomize the order
+  if (Math.random() > 0.5) {
+    sequence.push(handChallenge, faceChallenge);
+  } else {
+    sequence.push(faceChallenge, handChallenge);
+  }
+  
+  return sequence;
 }
 
 // Evaluate blendshapes and hands to see if they pass the target challenge

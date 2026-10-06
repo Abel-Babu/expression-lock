@@ -1,6 +1,6 @@
 import { initIdentityEngine, extractFaceEmbedding, computeEuclideanDistance } from './identity.js';
 import { initVisionEngine, startCameraAndTracking, stopCameraAndTracking } from './vision.js';
-import { getRandomChallenge, evaluateChallenge } from './liveness.js';
+import { generateChallengeSequence, evaluateChallenge } from './liveness.js';
 import { CONFIG } from '../../../shared/config.js';
 
 let isBusy = false;
@@ -14,10 +14,7 @@ export async function startVerification({ challengeCount = 2, targetEmbedding = 
     await initVisionEngine();
 
     // Generate random sequence
-    const challengesToRun = [];
-    for (let i = 0; i < challengeCount; i++) {
-      challengesToRun.push(getRandomChallenge());
-    }
+    const challengesToRun = generateChallengeSequence(challengeCount);
 
     return new Promise((resolve, reject) => {
       let currentChallengeIndex = 0;
