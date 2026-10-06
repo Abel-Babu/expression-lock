@@ -16,7 +16,7 @@ export async function loadFaceApiScript() {
     }
 
     const script = document.createElement('script');
-    script.src = './vendor/face-api.min.js';
+    script.src = chrome.runtime.getURL('vendor/face-api.min.js');
     script.async = true;
     script.onload = () => {
       console.log('Face-API script loaded locally');
@@ -42,7 +42,7 @@ export async function initIdentityEngine(onProgress) {
     if (onProgress) onProgress('Loading face recognition models...');
     const faceapi = await loadFaceApiScript();
 
-    const MODEL_URI = './models';
+    const MODEL_URI = chrome.runtime.getURL('models');
     try {
       // Load models sequentially to avoid choking the local single-threaded Python server
       if (onProgress) onProgress('Loading Tiny Face Detector...');

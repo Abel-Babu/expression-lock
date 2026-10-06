@@ -1,5 +1,5 @@
 // src/liveness.js - Liveness Challenge Engine
-import { CONFIG } from './config.js';
+import { CONFIG } from '../../../shared/config.js';
 
 export const HAND_CHALLENGES = [
   { id: 'touch_nose', label: 'Touch your nose', instructions: 'Touch your nose with your finger' },

@@ -8,7 +8,8 @@ let isInitializing = false;
 // Dynamic import with CDN fallback
 async function getVisionTasks() {
   try {
-    return await import('../vendor/vision_bundle.mjs');
+    const url = chrome.runtime.getURL('vendor/vision_bundle.mjs');
+    return await import(url);
   } catch (err) {
     console.warn('Local vision bundle failed, falling back to CDN...', err);
     return await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs');
