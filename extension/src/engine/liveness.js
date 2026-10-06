@@ -11,9 +11,7 @@ export const FACE_CHALLENGES = [
   { id: 'mouth_open', label: 'Open your mouth', instructions: 'Open your mouth wide' },
   { id: 'blink_eyes', label: 'Blink your eyes', instructions: 'Blink both eyes slowly' },
   { id: 'eyebrows_up', label: 'Raise your eyebrows', instructions: 'Raise both eyebrows' },
-  { id: 'pucker', label: 'Pucker your lips', instructions: 'Pucker your lips like a kiss' },
-  { id: 'turn_left', label: 'Turn your head left', instructions: 'Turn your head to the left' },
-  { id: 'turn_right', label: 'Turn your head right', instructions: 'Turn your head to the right' }
+  { id: 'pucker', label: 'Pucker your lips', instructions: 'Pucker your lips like a kiss' }
 ];
 
 // Fallback for single random challenge (if needed)
@@ -67,19 +65,6 @@ export function evaluateChallenge(challengeId, frameData) {
       
     case 'pucker':
       return (scores['mouthPucker'] > CONFIG.BLENDSHAPE_PUCKER);
-      
-    case 'turn_left':
-    case 'turn_right':
-      if (!matrixes) return false;
-      // matrixes is a 4x4 array. Yaw is roughly Math.atan2(matrixes[8], matrixes[10]) or matrixes[0], matrixes[2] depending on format.
-      // But we can approximate yaw from the blendshapes `eyeLookInLeft`, `eyeLookOutRight`, etc., 
-      // or easier: just use the raw matrix. MediaPipe matrix: index 0,2 holds yaw info.
-      // We will simplify and use eye look direction as a proxy for head turn in this basic logic if matrix is too complex.
-      if (challengeId === 'turn_right') {
-        return (scores['eyeLookOutLeft'] > 0.4 && scores['eyeLookInRight'] > 0.4);
-      } else {
-        return (scores['eyeLookInLeft'] > 0.4 && scores['eyeLookOutRight'] > 0.4);
-      }
 
     case 'touch_nose':
     case 'cover_face':
@@ -103,8 +88,9 @@ export function evaluateChallenge(challengeId, frameData) {
         const distNose = Math.sqrt(Math.pow(indexTip.x - nose.x, 2) + Math.pow(indexTip.y - nose.y, 2));
         const distMouth = Math.sqrt(Math.pow(palm.x - mouth.x, 2) + Math.pow(palm.y - mouth.y, 2));
         
-        if (challengeId === 'touch_nose' && distNose < 0.1) return true;
-        if (challengeId === 'cover_face' && distMouth < 0.2) return true;
+        // Loosened thresholds significantly for better detection
+        if (challengeId === 'touch_nose' && distNose < 0.20) return true;
+        if (challengeId === 'cover_face' && distMouth < 0.25) return true;
       }
       return false;
 

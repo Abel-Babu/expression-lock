@@ -107,12 +107,21 @@ export async function startCameraAndTracking(videoEl, canvasEl, onFrameCallback)
 
     const ctx = canvasEl.getContext('2d');
     let lastVideoTime = -1;
+    let frameTick = 0;
 
     function renderLoop() {
       if (!currentStream || videoEl.paused || videoEl.ended) return;
 
       if (videoEl.currentTime !== lastVideoTime && faceLandmarker) {
         lastVideoTime = videoEl.currentTime;
+        frameTick++;
+
+        // Throttle processing to every 2nd frame (approx 15 FPS) to massively reduce CPU/GPU load
+        if (frameTick % 2 !== 0) {
+          animationFrameId = requestAnimationFrame(renderLoop);
+          return;
+        }
+
         const startTimeMs = performance.now();
         const results = faceLandmarker.detectForVideo(videoEl, startTimeMs);
         
