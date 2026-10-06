@@ -139,6 +139,13 @@
       "email": "dummy-id-3676@example.com",
       "role": "host_eligible",
       "status": "Enrolled"
+    },
+    "dummy-id-8852": {
+      "id": "dummy-id-8852",
+      "name": "Test 8852",
+      "email": "dummy-id-8852@example.com",
+      "role": "host_eligible",
+      "status": "Enrolled"
     }
   },
   "invites": {},
