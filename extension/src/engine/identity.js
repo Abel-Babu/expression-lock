@@ -80,8 +80,8 @@ export async function initIdentityEngine(onProgress) {
 export async function extractFaceEmbedding(inputElement) {
   const faceapi = await initIdentityEngine();
   const options = new faceapi.TinyFaceDetectorOptions({
-    inputSize: 320,
-    scoreThreshold: 0.5
+    inputSize: 416,
+    scoreThreshold: 0.2
   });
 
   try {
