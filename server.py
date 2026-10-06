@@ -10,6 +10,6 @@ class NoCacheHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     PORT = 8080
-    with socketserver.TCPServer(("", PORT), NoCacheHTTPRequestHandler) as httpd:
-        print(f"Serving at port {PORT} with no caching...")
+    with http.server.ThreadingHTTPServer(("", PORT), NoCacheHTTPRequestHandler) as httpd:
+        print(f"Serving at port {PORT} with no caching (Multi-threaded)...")
         httpd.serve_forever()
