@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "Expression Lock",
+  "version": "1.0.0",
+  "description": "Zero-Trust Biometric Meeting Verification",
+  "action": {
+    "default_title": "Expression Lock"
+  },
+  "options_page": "src/options/index.html",
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "assets/index.js-BxkOlr9M.js"
+      ],
+      "matches": [
+        "*://meet.google.com/*"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "*://meet.google.com/*",
+    "http://localhost:3000/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "*://meet.google.com/*"
+      ],
+      "resources": [
+        "src/engine/engine.html",
+        "vendor/*",
+        "models/*",
+        "assets/index.js-BxkOlr9M.js"
+      ],
+      "use_dynamic_url": false
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}
