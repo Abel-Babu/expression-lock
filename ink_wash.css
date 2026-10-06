@@ -215,3 +215,541 @@ main.blurred { filter: blur(8px); pointer-events: none; }
 .badge.success { background: var(--emerald); color: #fff; }
 .badge.pending { background: var(--c-slate-blue); color: var(--c-cream); }
 .badge.error { background: var(--crimson); color: #fff; }
+
+
+/* =========================================================
+   Phase 3: Org Console & Biometric Enrollment Styles
+   ========================================================= */
+.org-console-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  width: 100%;
+  overflow-y: auto;
+}
+
+.org-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1.5rem;
+}
+
+.org-title-group h2 {
+  font-size: 1.75rem;
+  color: var(--c-cream);
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.3px;
+}
+
+.org-title-group p {
+  color: var(--c-silver);
+  font-size: 0.9rem;
+  max-width: 700px;
+  line-height: 1.45;
+}
+
+/* Metric Cards */
+.org-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: var(--bg-panel);
+  border: 1px solid rgba(109, 129, 150, 0.25);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--c-silver);
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--c-cream);
+  margin: 0.4rem 0 0.2rem 0;
+}
+
+.metric-value small {
+  font-size: 0.9rem;
+  color: var(--c-silver);
+  font-weight: normal;
+}
+
+.metric-subtext {
+  font-size: 0.75rem;
+  color: var(--c-silver);
+}
+
+.metric-progress {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.metric-bar {
+  height: 100%;
+  background: var(--c-slate-blue);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Section Card & Table */
+.org-section-card {
+  background: var(--bg-panel);
+  border: 1px solid rgba(109, 129, 150, 0.25);
+  border-radius: 10px;
+  padding: 1.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.section-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(203, 203, 203, 0.08);
+}
+
+.section-card-header h3 {
+  font-size: 1.15rem;
+  color: var(--c-cream);
+  font-weight: 600;
+}
+
+.section-tag {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--c-slate-blue);
+  background: rgba(109, 129, 150, 0.15);
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid rgba(109, 129, 150, 0.25);
+}
+
+.org-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.org-table th {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(203, 203, 203, 0.12);
+  color: var(--c-silver);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.org-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(203, 203, 203, 0.05);
+  vertical-align: middle;
+  font-size: 0.9rem;
+  color: var(--c-cream);
+}
+
+.org-table tr.row-enrolled {
+  background: rgba(16, 185, 129, 0.02);
+}
+
+.officer-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.officer-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--c-dark-slate);
+  color: var(--c-silver);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border: 1.5px solid rgba(203, 203, 203, 0.2);
+}
+
+.officer-avatar.avatar-active {
+  border-color: var(--emerald);
+  color: var(--emerald);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.officer-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.officer-meta strong {
+  color: var(--c-cream);
+  font-size: 0.92rem;
+}
+
+.officer-meta small {
+  color: var(--c-silver);
+  font-size: 0.78rem;
+}
+
+.dept-tag {
+  color: var(--c-silver);
+  font-size: 0.82rem;
+}
+
+.policy-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.policy-details strong {
+  font-size: 0.85rem;
+  color: var(--c-cream);
+}
+
+.policy-details small {
+  font-size: 0.75rem;
+  color: var(--c-silver);
+}
+
+.enrolled-date small {
+  font-size: 0.72rem;
+  color: var(--c-silver);
+}
+
+/* Button Variants */
+.btn-group-cell {
+  display: inline-flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.btn-sm {
+  padding: 0.45rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--c-slate-blue);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #7c92a8;
+}
+
+.btn-primary-outline {
+  background: transparent;
+  border: 1px solid var(--c-slate-blue);
+  color: var(--c-cream);
+}
+.btn-primary-outline:hover {
+  background: rgba(109, 129, 150, 0.15);
+}
+
+.btn-danger-outline {
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: var(--crimson);
+}
+.btn-danger-outline:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.btn-secondary {
+  background: var(--c-dark-slate);
+  color: var(--c-silver);
+  border: 1px solid rgba(203, 203, 203, 0.15);
+}
+.btn-secondary:hover {
+  background: #555555;
+  color: var(--c-cream);
+}
+
+/* Enrollment Wizard Modal */
+.enrollment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(20, 24, 30, 0.88);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+}
+
+.enrollment-modal-content {
+  background: var(--bg-panel);
+  border: 1px solid rgba(109, 129, 150, 0.4);
+  border-radius: 12px;
+  width: 92%;
+  max-width: 860px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+}
+
+.enrollment-modal-header {
+  padding: 1.25rem 1.75rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(203, 203, 203, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header-titles h3 {
+  font-size: 1.2rem;
+  color: var(--c-cream);
+  margin: 0;
+}
+
+.modal-header-titles span {
+  font-size: 0.8rem;
+  color: var(--c-slate-blue);
+  font-weight: 500;
+}
+
+.enrollment-modal-body {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1.5rem;
+  padding: 1.75rem;
+}
+
+.enroll-video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(109, 129, 150, 0.3);
+}
+
+.enroll-video-wrapper video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.enroll-video-wrapper canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(-1);
+  pointer-events: none;
+}
+
+.face-target-guide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 58%;
+  height: 72%;
+  border: 2px dashed rgba(109, 129, 150, 0.4);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.face-target-guide.aligned {
+  border-color: var(--emerald);
+  border-style: solid;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.enroll-video-status {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  background: rgba(15, 18, 22, 0.85);
+  backdrop-filter: blur(4px);
+  padding: 0.4rem 0.85rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--c-cream);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c-slate-blue);
+  animation: pulse 1.5s infinite;
+}
+
+.enroll-controls-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.enroll-controls-pane h4 {
+  font-size: 1.05rem;
+  color: var(--c-cream);
+  margin-bottom: 0.35rem;
+}
+
+.enroll-instruction {
+  font-size: 0.82rem;
+  color: var(--c-silver);
+  line-height: 1.45;
+  margin-bottom: 1.25rem;
+}
+
+.sample-progress-tracker {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+}
+
+.sample-step {
+  flex: 1;
+  height: 36px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(203, 203, 203, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--c-silver);
+  transition: all 0.3s;
+}
+
+.sample-step.completed {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--emerald);
+  color: var(--emerald);
+}
+
+.quality-feedback-box {
+  background: var(--bg-sidebar);
+  border: 1px solid rgba(203, 203, 203, 0.08);
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.quality-item {
+  font-size: 0.78rem;
+  color: var(--c-silver);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+.quality-item:last-child { margin-bottom: 0; }
+
+.quality-item .q-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #666;
+}
+
+.quality-item.valid {
+  color: var(--emerald);
+}
+.quality-item.valid .q-dot {
+  background: var(--emerald);
+}
+
+.enroll-actions-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+/* Match Score Card */
+.match-score-card {
+  background: var(--bg-sidebar);
+  border: 1px solid rgba(109, 129, 150, 0.25);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.match-score-card.verified {
+  border-color: var(--emerald);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.match-score-card.mismatch {
+  border-color: var(--crimson);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.match-percentage {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--c-cream);
+  letter-spacing: -1px;
+}
+
+.match-score-card.verified .match-percentage {
+  color: var(--emerald);
+}
+
+.match-score-card.mismatch .match-percentage {
+  color: var(--crimson);
+}
+
+.match-status-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--c-silver);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.25rem;
+}
+
+.match-distance-detail {
+  font-size: 0.75rem;
+  color: var(--c-silver);
+  margin-top: 0.5rem;
+  font-family: monospace;
+}
+
+.audit-table td {
+  padding: 0.65rem 1rem;
+}

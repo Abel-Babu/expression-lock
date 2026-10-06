@@ -12,7 +12,11 @@ files = {
     "models/tiny_face_detector_model-shard1": "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/tiny_face_detector_model-shard1",
     "models/face_recognition_model-weights_manifest.json": "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/face_recognition_model-weights_manifest.json",
     "models/face_recognition_model-shard1": "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/face_recognition_model-shard1",
-    "models/face_recognition_model-shard2": "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/face_recognition_model-shard2"
+    "models/face_recognition_model-shard2": "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/face_recognition_model-shard2",
+    "models/face_landmark_68_model-weights_manifest.json": "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/face_landmark_68_model-weights_manifest.json",
+    "models/face_landmark_68_model-shard1": "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/face_landmark_68_model-shard1",
+    "models/face_landmark_68_tiny_model-weights_manifest.json": "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/face_landmark_68_tiny_model-weights_manifest.json",
+    "models/face_landmark_68_tiny_model-shard1": "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/face_landmark_68_tiny_model-shard1"
 }
 
 for path, url in files.items():
