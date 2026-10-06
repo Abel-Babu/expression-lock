@@ -57,6 +57,10 @@ export async function startVerification({ challengeCount = 2, targetEmbedding = 
       startCameraAndTracking(video, canvas, async (frameData) => {
         frameCount++;
 
+        if (frameCount === 1) {
+          challengeStartTime = Date.now();
+        }
+
         if (Date.now() - challengeStartTime > CONFIG.CHALLENGE_TIME_MS) {
           stopCameraAndTracking();
           isBusy = false;

@@ -96,6 +96,11 @@ export function renderParticipantTile(container) {
         if (!isActive) return;
         frameCount++;
 
+        // Start the timer ONLY when the first actual camera frame arrives
+        if (frameCount === 1) {
+          challengeStartTime = Date.now();
+        }
+
         // Timeout using config
         if (Date.now() - challengeStartTime > CONFIG.CHALLENGE_TIME_MS) {
           failChallenge('Liveness Challenge Timeout');
