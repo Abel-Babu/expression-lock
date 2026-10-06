@@ -73,6 +73,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({ type: 'ARM_MEETING' }));
     }
+  } else if (message.type === 'MANUAL_CHECK_REQ') {
+    // Manually trigger a check instantly
+    chrome.tabs.query({ url: '*://meet.google.com/*' }, (tabs) => {
+      tabs.forEach(tab => {
+        chrome.tabs.sendMessage(tab.id, {
+          type: 'TRIGGER_VERIFICATION',
+          nonce: 'manual-nonce-' + Date.now()
+        });
+      });
+    });
   } else if (message.type === 'VERIFICATION_COMPLETE') {
     console.log('[Background] Relaying verified signed result to server:', message.payload);
     if (socket && socket.readyState === WebSocket.OPEN) {
