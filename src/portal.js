@@ -133,21 +133,33 @@ export function renderPortal(container) {
         strip.className = 'session-strip verified';
         strip.innerHTML = `<span><strong>Session Status:</strong> Verified (Host: ${payload.userName})</span><span>29:45</span>`;
       } else if (type === 'LIVENESS_FAILED') {
-        btn.className = 'btn-action btn-locked';
-        btn.textContent = 'Locked: verification failed';
+        btn.className = 'btn-action btn-frozen';
+        btn.textContent = 'TRANSACTION FROZEN - SECURITY ESCALATION TRIGGERED';
         strip.className = 'session-strip unverified';
-        strip.innerHTML = `<span><strong>Session Status:</strong> FAILED</span><span>--:--</span>`;
+        strip.innerHTML = `<span><strong>Session Status:</strong> SECURITY ESCALATION</span><span>--:--</span>`;
+      } else if (type === 'RESET_STATE') {
+        btn.className = 'btn-action btn-locked';
+        btn.textContent = 'Locked: verified meeting session required';
+        strip.className = 'session-strip unverified';
+        strip.innerHTML = '<span><strong>Session Status:</strong> No verified meeting session</span><span>--:--</span>';
       }
     });
   });
 
   // Handle the action button click
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     if (btn.classList.contains('btn-ready')) {
+      // Compute cryptographic receipt
+      const msg = new TextEncoder().encode(`TX-2026-0001|${Date.now()}|${Math.random()}`);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msg);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const shortHash = hashHex.substring(0, 16);
+
       // Execute the transfer!
       btn.className = 'btn-action btn-authorized';
       btn.textContent = 'Transfer Authorized & Executed';
-      strip.innerHTML = '<span><strong>Session Status:</strong> Transaction Complete</span><span>00:00</span>';
+      strip.innerHTML = `<span><strong>Session Status:</strong> Transaction Complete (Receipt: ${shortHash})</span><span>00:00</span>`;
     }
   });
 
