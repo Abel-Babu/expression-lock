@@ -20,13 +20,14 @@
       color: var(--c-cream);
       margin-bottom: 0.5rem;
       letter-spacing: -0.5px;
+      font-weight: 700;
     }
     .hub-header h1 span {
       color: var(--primary-accent);
     }
     .hub-header p {
       color: var(--c-silver);
-      font-size: 1.1rem;
+      font-size: 1.05rem;
     }
     .hub-grid {
       display: grid;
@@ -37,7 +38,7 @@
     .hub-card {
       background: var(--bg-panel);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
+      border-radius: 10px;
       padding: 1.75rem;
       display: flex;
       flex-direction: column;
@@ -50,35 +51,43 @@
     .hub-card:hover {
       transform: translateY(-4px);
       border-color: var(--primary-accent);
-      box-shadow: 0 15px 35px rgba(109, 129, 150, 0.15);
+      box-shadow: 0 15px 35px rgba(109, 129, 150, 0.2);
     }
     .hub-card .badge-tag {
       position: absolute;
       top: 1.25rem;
       right: 1.25rem;
       font-size: 0.7rem;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      padding: 0.2rem 0.5rem;
+      padding: 0.25rem 0.6rem;
       border-radius: 4px;
       background: rgba(109, 129, 150, 0.15);
       color: var(--primary-accent);
       border: 1px solid rgba(109, 129, 150, 0.3);
     }
-    .hub-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
+    .hub-icon-svg {
+      width: 32px;
+      height: 32px;
+      stroke: var(--primary-accent);
+      stroke-width: 1.8;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      margin-bottom: 1.25rem;
     }
     .hub-card h3 {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       color: var(--c-cream);
       margin-bottom: 0.5rem;
+      font-weight: 600;
     }
     .hub-card p {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: var(--c-silver);
       margin-bottom: 1.5rem;
-      line-height: 1.4;
+      line-height: 1.45;
     }
     .hub-btn {
       display: inline-flex;
@@ -86,13 +95,13 @@
       justify-content: center;
       gap: 0.5rem;
       width: 100%;
-      padding: 0.85rem;
+      padding: 0.8rem;
       border-radius: 6px;
       background: var(--primary-accent);
-      color: var(--bg-dark);
-      font-weight: 700;
+      color: #ffffff;
+      font-weight: 600;
       text-decoration: none;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       transition: all 0.2s;
     }
     .hub-btn:hover {
@@ -106,7 +115,7 @@
     }
     .hub-btn.secondary:hover {
       border-color: var(--primary-accent);
-      color: var(--primary-accent);
+      color: var(--c-cream);
     }
     .demo-tips {
       background: var(--bg-sidebar);
@@ -117,7 +126,12 @@
     .demo-tips h4 {
       color: var(--primary-accent);
       margin-bottom: 0.75rem;
-      font-size: 1rem;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     .demo-tips ul {
       list-style-position: inside;
@@ -132,84 +146,84 @@
   <div class="hub-container">
     <div class="hub-header">
       <h1>Expression <span>Lock</span></h1>
-      <p>Presenter Mission Control & Multi-Tab Quick Launchpad</p>
+      <p>Zero-Trust Biometric Security & Mission Control</p>
     </div>
 
     <div class="hub-grid">
       <!-- Card 1: Bank Portal -->
       <div class="hub-card">
         <span class="badge-tag">Checkpoint 2</span>
-        <div class="hub-icon">🏦</div>
+        <svg class="hub-icon-svg" viewBox="0 0 24 24"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2L2 7h20L12 2z"/></svg>
         <h3>Treasury Portal</h3>
-        <p>The protected corporate website. Standalone banking view for the $25M wire transfer authorization.</p>
+        <p>Protected corporate interface. Standalone banking view for \$25M wire transfer authorization.</p>
         <a href="portal.html" target="_blank" class="hub-btn">
-          Open Bank Portal ↗️
+          Open Bank Portal &rarr;
         </a>
       </div>
 
       <!-- Card 2: Host Panel -->
       <div class="hub-card">
         <span class="badge-tag">Checkpoint 1</span>
-        <div class="hub-icon">👨‍💻</div>
+        <svg class="hub-icon-svg" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><path d="M8 21h8M12 17v4"/></svg>
         <h3>Meeting Host Panel</h3>
-        <p>Host verifies themselves first, then triggers a "Verify Everyone" round for all meeting attendees.</p>
+        <p>Host verifies credentials, then triggers synchronous room-wide verification rounds for attendees.</p>
         <a href="index.html#/host" target="_blank" class="hub-btn">
-          Open Host Panel ↗️
+          Open Host Panel &rarr;
         </a>
       </div>
 
       <!-- Card 3: Participant View -->
       <div class="hub-card">
         <span class="badge-tag">Live Call Tile</span>
-        <div class="hub-icon">🎥</div>
+        <svg class="hub-icon-svg" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
         <h3>Participant View</h3>
-        <p>Simulates a meeting attendee screen that receives biometric prompts and runs challenges.</p>
+        <p>Simulated attendee terminal that executes synchronized biometric and micro-expression challenges.</p>
         <a href="index.html#/participant" target="_blank" class="hub-btn">
-          Open Participant Tile ↗️
+          Open Participant Tile &rarr;
         </a>
       </div>
 
       <!-- Card 4: Org Console -->
       <div class="hub-card">
         <span class="badge-tag">Admin & Directory</span>
-        <div class="hub-icon">🏢</div>
+        <svg class="hub-icon-svg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <h3>Org Console</h3>
-        <p>Company management view to add employees, enroll face templates, and configure policies.</p>
+        <p>Enterprise identity management to enroll biometric vectors, manage rosters, and enforce policies.</p>
         <a href="index.html#/org" target="_blank" class="hub-btn">
-          Open Org Console ↗️
+          Open Org Console &rarr;
         </a>
       </div>
 
       <!-- Card 5: Diagnostic Engine -->
       <div class="hub-card">
         <span class="badge-tag">Offline Diagnostics</span>
-        <div class="hub-icon">🩺</div>
+        <svg class="hub-icon-svg" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         <h3>Engine Status</h3>
-        <p>Checks local camera access and verifies MediaPipe & face-api model files are loaded.</p>
+        <p>Verify offline local camera access, WebAssembly runtime, and MediaPipe / Face-API model status.</p>
         <a href="index.html#/engine" target="_blank" class="hub-btn secondary">
-          Run Diagnostics ↗️
+          Run Diagnostics &rarr;
         </a>
       </div>
 
       <!-- Card 6: All-In-One Unified View -->
       <div class="hub-card">
         <span class="badge-tag">Single Tab View</span>
-        <div class="hub-icon">🌐</div>
+        <svg class="hub-icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         <h3>Unified Prototype</h3>
-        <p>The original all-in-one prototype view with top navigation tabs to switch between all screens.</p>
+        <p>The integrated multi-view workspace with navigation tabs to inspect all endpoints simultaneously.</p>
         <a href="index.html" class="hub-btn secondary">
-          Open Unified Prototype ↗️
+          Open Unified Prototype &rarr;
         </a>
       </div>
     </div>
 
     <!-- Presentation Quick Tips -->
     <div class="demo-tips">
-      <h4>💡 Multi-Tab Demo Recommended Setup:</h4>
+      <h4>[ Multi-Tab Demo Configuration ]</h4>
       <ul>
-        <li><strong>Tab 1:</strong> Keep <code>portal.html</code> open on the left half of your screen.</li>
-        <li><strong>Tab 2:</strong> Keep <code>index.html#/host</code> open on the right half to simulate the video conference.</li>
-        <li>Show the judges: <em>"First we verify the meeting room, then we verify the hand that clicks the wire transfer button!"</em></li>
+        <li><strong>Tab 1:</strong> Position <code>portal.html</code> on the left half of the display.</li>
+        <li><strong>Tab 2:</strong> Position <code>index.html#/host</code> on the right half to simulate the conference bridge.</li>
+        <li><strong>Key Narrative:</strong> <em>"We verify the room collectively at Checkpoint 1, and cryptographically gate the executing transaction at Checkpoint 2."</em></li>
       </ul>
     </div>
   </div>

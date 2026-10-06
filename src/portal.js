@@ -10,11 +10,11 @@ export function renderPortal(container) {
           <span>Arup Treasury</span>
         </div>
         <ul class="nav-links">
-          <li class="active">⏱️ Pending Approvals <span class="badge error">1</span></li>
-          <li>💼 Accounts</li>
-          <li>💸 Wire Transfers</li>
-          <li>📜 Audit Logs</li>
-          <li>⚙️ Settings</li>
+          <li class="active">Pending Approvals <span class="badge error">1</span></li>
+          <li>Accounts</li>
+          <li>Wire Transfers</li>
+          <li>Audit Logs</li>
+          <li>Settings</li>
         </ul>
       </aside>
 
