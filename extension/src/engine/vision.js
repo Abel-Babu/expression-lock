@@ -32,7 +32,7 @@ export async function initVisionEngine(onStatusChange) {
     
     // Resolve WASM loader
     try {
-      visionFileset = await FilesetResolver.forVisionTasks('./vendor');
+      visionFileset = await FilesetResolver.forVisionTasks(chrome.runtime.getURL('vendor'));
     } catch (e) {
       console.warn('Local WASM failed, falling back to CDN WASM...', e);
       visionFileset = await FilesetResolver.forVisionTasks(
@@ -43,7 +43,7 @@ export async function initVisionEngine(onStatusChange) {
     // Load FaceLandmarker with full blendshapes & transform matrices
     faceLandmarker = await FaceLandmarker.createFromOptions(visionFileset, {
       baseOptions: {
-        modelAssetPath: './vendor/face_landmarker.task',
+        modelAssetPath: chrome.runtime.getURL('vendor/face_landmarker.task'),
         delegate: 'GPU'
       },
       outputFaceBlendshapes: true,
@@ -56,7 +56,7 @@ export async function initVisionEngine(onStatusChange) {
     try {
       window.handLandmarker = await HandLandmarker.createFromOptions(visionFileset, {
         baseOptions: {
-          modelAssetPath: './vendor/hand_landmarker.task',
+          modelAssetPath: chrome.runtime.getURL('vendor/hand_landmarker.task'),
           delegate: 'GPU'
         },
         runningMode: 'VIDEO',
