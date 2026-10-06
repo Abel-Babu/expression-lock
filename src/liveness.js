@@ -2,9 +2,9 @@
 export const CHALLENGES = [
   { id: 'smile', label: 'Smile brightly', instructions: 'Please smile for the camera' },
   { id: 'mouth_open', label: 'Open your mouth', instructions: 'Open your mouth wide' },
-  { id: 'blink_left', label: 'Wink your left eye', instructions: 'Wink or blink your left eye' },
-  { id: 'blink_right', label: 'Wink your right eye', instructions: 'Wink or blink your right eye' },
-  { id: 'eyebrows_up', label: 'Raise your eyebrows', instructions: 'Raise both eyebrows' }
+  { id: 'blink_eyes', label: 'Blink your eyes', instructions: 'Blink both eyes slowly' },
+  { id: 'eyebrows_up', label: 'Raise your eyebrows', instructions: 'Raise both eyebrows' },
+  { id: 'pucker', label: 'Pucker your lips', instructions: 'Pucker your lips like a kiss' }
 ];
 
 export function getRandomChallenge() {
@@ -22,25 +22,24 @@ export function evaluateChallenge(challengeId, blendshapes) {
     scores[b.categoryName] = b.score;
   });
 
-  const THRESHOLD = 0.5; // Requires significant expression intensity
-
   switch (challengeId) {
     case 'smile':
       // mouthSmileLeft and mouthSmileRight
-      return (scores['mouthSmileLeft'] > THRESHOLD && scores['mouthSmileRight'] > THRESHOLD);
+      return (scores['mouthSmileLeft'] > 0.4 && scores['mouthSmileRight'] > 0.4);
       
     case 'mouth_open':
-      return (scores['jawOpen'] > 0.6); // Slightly higher threshold to ensure it's wide open
+      return (scores['jawOpen'] > 0.45); 
       
-    case 'blink_left':
-      // Note: "Left" in MediaPipe refers to the user's left eye (often mirrored on screen)
-      return (scores['eyeBlinkLeft'] > 0.6 && scores['eyeBlinkRight'] < 0.2);
-      
-    case 'blink_right':
-      return (scores['eyeBlinkRight'] > 0.6 && scores['eyeBlinkLeft'] < 0.2);
+    case 'blink_eyes':
+      // Blinking both eyes is much more reliable than winking
+      return (scores['eyeBlinkLeft'] > 0.45 && scores['eyeBlinkRight'] > 0.45);
       
     case 'eyebrows_up':
-      return (scores['browInnerUp'] > 0.5);
+      // browInnerUp usually correlates strongly with raised eyebrows
+      return (scores['browInnerUp'] > 0.4);
+      
+    case 'pucker':
+      return (scores['mouthPucker'] > 0.5);
       
     default:
       return false;
