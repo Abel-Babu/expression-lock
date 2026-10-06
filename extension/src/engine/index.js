@@ -35,6 +35,8 @@ export async function startVerification({ challengeCount = 2, targetEmbedding = 
         video.autoplay = true;
         video.playsInline = true;
         video.muted = true;
+        video.width = 640;
+        video.height = 480;
         document.body.appendChild(video);
       }
       
@@ -111,10 +113,10 @@ export async function startVerification({ challengeCount = 2, targetEmbedding = 
             }
           } catch (err) {
             console.error('Extraction error:', err);
-            // If the camera was stopped, we MUST resolve or reject to avoid hanging
-            if (currentChallengeIndex >= challengeCount) {
-               reject(err);
-            }
+            // Send the exact error back to the dashboard immediately instead of swallowing!
+            stopCameraAndTracking();
+            isBusy = false;
+            reject(new Error("Extraction Error: " + err.message));
           } finally {
             isExtractingIdentity = false;
           }
