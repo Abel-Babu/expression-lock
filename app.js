@@ -74,4 +74,11 @@ async function runEngineChecks() {
 }
 
 window.addEventListener('hashchange', renderView);
-document.addEventListener('DOMContentLoaded', renderView);
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderView);
+} else {
+  // If the module loaded after DOMContentLoaded (which happens with type="module"),
+  // execute it immediately.
+  renderView();
+}
