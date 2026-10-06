@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expression Lock — Quick Launchpad</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .hub-container {
+      max-width: 1000px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+    }
+    .hub-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .hub-header h1 {
+      font-size: 2.4rem;
+      color: var(--white);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+    .hub-header h1 span {
+      color: var(--primary-orange);
+    }
+    .hub-header p {
+      color: var(--warm-gray);
+      font-size: 1.1rem;
+    }
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .hub-card {
+      background: var(--charcoal);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+    }
+    .hub-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary-orange);
+      box-shadow: 0 15px 35px rgba(244, 123, 32, 0.15);
+    }
+    .hub-card .badge-tag {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(244, 123, 32, 0.15);
+      color: var(--primary-orange);
+      border: 1px solid rgba(244, 123, 32, 0.3);
+    }
+    .hub-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .hub-card h3 {
+      font-size: 1.25rem;
+      color: var(--white);
+      margin-bottom: 0.5rem;
+    }
+    .hub-card p {
+      font-size: 0.9rem;
+      color: var(--warm-gray);
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+    .hub-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.85rem;
+      border-radius: 6px;
+      background: var(--primary-orange);
+      color: var(--deep-black);
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+    .hub-btn:hover {
+      background: #ff8e36;
+      box-shadow: 0 0 15px rgba(244, 123, 32, 0.4);
+    }
+    .hub-btn.secondary {
+      background: #1a1a1a;
+      color: var(--off-white);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .hub-btn.secondary:hover {
+      border-color: var(--primary-orange);
+      color: var(--primary-orange);
+    }
+    .demo-tips {
+      background: #181818;
+      border: 1px solid rgba(244, 123, 32, 0.2);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    .demo-tips h4 {
+      color: var(--primary-orange);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .demo-tips ul {
+      list-style-position: inside;
+      color: var(--warm-gray);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body style="overflow-y: auto;">
+
+  <div class="hub-container">
+    <div class="hub-header">
+      <h1>Expression <span>Lock</span></h1>
+      <p>Presenter Mission Control & Multi-Tab Quick Launchpad</p>
+    </div>
+
+    <div class="hub-grid">
+      <!-- Card 1: Bank Portal -->
+      <div class="hub-card">
+        <span class="badge-tag">Checkpoint 2</span>
+        <div class="hub-icon">🏦</div>
+        <h3>Treasury Portal</h3>
+        <p>The protected corporate website. Standalone banking view for the $25M wire transfer authorization.</p>
+        <a href="portal.html" target="_blank" class="hub-btn">
+          Open Bank Portal ↗
+        </a>
+      </div>
+
+      <!-- Card 2: Host Panel -->
+      <div class="hub-card">
+        <span class="badge-tag">Checkpoint 1</span>
+        <div class="hub-icon">🎙️</div>
+        <h3>Meeting Host Panel</h3>
+        <p>Host verifies themselves first, then triggers a "Verify Everyone" round for all meeting attendees.</p>
+        <a href="index.html#/host" target="_blank" class="hub-btn">
+          Open Host Panel ↗
+        </a>
+      </div>
+
+      <!-- Card 3: Participant View -->
+      <div class="hub-card">
+        <span class="badge-tag">Live Call Tile</span>
+        <div class="hub-icon">👤</div>
+        <h3>Participant View</h3>
+        <p>Simulates a meeting attendee screen that receives biometric prompts and runs challenges.</p>
+        <a href="index.html#/participant" target="_blank" class="hub-btn">
+          Open Participant Tile ↗
+        </a>
+      </div>
+
+      <!-- Card 4: Org Console -->
+      <div class="hub-card">
+        <span class="badge-tag">Admin & Directory</span>
+        <div class="hub-icon">🏢</div>
+        <h3>Org Console</h3>
+        <p>Company management view to add employees, enroll face templates, and configure policies.</p>
+        <a href="index.html#/org" target="_blank" class="hub-btn">
+          Open Org Console ↗
+        </a>
+      </div>
+
+      <!-- Card 5: Diagnostic Engine -->
+      <div class="hub-card">
+        <span class="badge-tag">Offline Diagnostics</span>
+        <div class="hub-icon">⚙️</div>
+        <h3>Engine Status</h3>
+        <p>Checks local camera access and verifies MediaPipe & face-api model files are loaded.</p>
+        <a href="index.html#/engine" target="_blank" class="hub-btn secondary">
+          Run Diagnostics ↗
+        </a>
+      </div>
+
+      <!-- Card 6: All-In-One Unified View -->
+      <div class="hub-card">
+        <span class="badge-tag">Single Tab View</span>
+        <div class="hub-icon">🖥️</div>
+        <h3>Unified Prototype</h3>
+        <p>The original all-in-one prototype view with top navigation tabs to switch between all screens.</p>
+        <a href="index.html" class="hub-btn secondary">
+          Open Unified Prototype →
+        </a>
+      </div>
+    </div>
+
+    <!-- Presentation Quick Tips -->
+    <div class="demo-tips">
+      <h4>💡 Multi-Tab Demo Recommended Setup:</h4>
+      <ul>
+        <li><strong>Tab 1:</strong> Keep <code>portal.html</code> open on the left half of your screen.</li>
+        <li><strong>Tab 2:</strong> Keep <code>index.html#/host</code> open on the right half to simulate the video conference.</li>
+        <li>Show the judges: <em>"First we verify the meeting room, then we verify the hand that clicks the wire transfer button!"</em></li>
+      </ul>
+    </div>
+  </div>
+
+</body>
+</html>
