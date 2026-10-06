@@ -90,6 +90,7 @@ export function renderParticipantTile(container) {
       
       let expressionPassed = false;
       let frameCount = 0;
+      let isExtractingIdentity = false;
 
       await startCameraAndTracking(video, canvas, async (frameData) => {
         if (!isActive) return;
@@ -112,29 +113,34 @@ export function renderParticipantTile(container) {
         }
 
         // Once expression is passed, check identity on the next frame
-        if (expressionPassed && frameCount % 5 === 0) {
-          const identityResult = await extractFaceEmbedding(video);
-          if (identityResult) {
-            const distance = computeEuclideanDistance(currentTargetUser.embedding, identityResult.descriptor);
-            
-            if (distance < CONFIG.IDENTITY_MATCH_DISTANCE) { 
-              // Identity matches for this challenge
-              if (currentChallengeIndex === 0) {
-                // Move to next challenge
-                currentChallengeIndex++;
-                currentChallenge = challengesToRun[currentChallengeIndex];
-                challengeTitle.textContent = `Challenge 2 of 2: ${currentChallenge.instructions}`;
-                overlay.textContent = 'Identity matched! Next challenge...';
-                challengeStartTime = Date.now(); // reset timer
-                expressionPassed = false;
-                progressBar.style.width = '50%';
+        if (expressionPassed && frameCount % 5 === 0 && !isExtractingIdentity) {
+          isExtractingIdentity = true;
+          try {
+            const identityResult = await extractFaceEmbedding(video);
+            if (identityResult) {
+              const distance = computeEuclideanDistance(currentTargetUser.embedding, identityResult.descriptor);
+              
+              if (distance < CONFIG.IDENTITY_MATCH_DISTANCE) { 
+                // Identity matches for this challenge
+                if (currentChallengeIndex === 0) {
+                  // Move to next challenge
+                  currentChallengeIndex++;
+                  currentChallenge = challengesToRun[currentChallengeIndex];
+                  challengeTitle.textContent = `Challenge 2 of 2: ${currentChallenge.instructions}`;
+                  overlay.textContent = 'Identity matched! Next challenge...';
+                  challengeStartTime = Date.now(); // reset timer
+                  expressionPassed = false;
+                  progressBar.style.width = '50%';
+                } else {
+                  // Both challenges passed
+                  passChallenge();
+                }
               } else {
-                // Both challenges passed
-                passChallenge();
+                overlay.textContent = `Identity mismatch (Dist: ${distance.toFixed(2)}). Trying again...`;
               }
-            } else {
-              overlay.textContent = `Identity mismatch (Dist: ${distance.toFixed(2)}). Trying again...`;
             }
+          } finally {
+            isExtractingIdentity = false;
           }
         }
       });
