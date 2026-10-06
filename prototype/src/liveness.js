@@ -95,10 +95,13 @@ export function evaluateChallenge(challengeId, frameData) {
       // towards the right edge of the screen (from the user's perspective).
       // Let's accept either extreme for either challenge just to be safe with mirroring!
       if (challengeId === 'big_turn_right') {
-         // Deep turn threshold
-         return ratio < 0.3 || ratio > 3.0; 
+         // Turning right (from subject perspective) brings nose closer to right cheek (454)
+         // so distRight gets very small, making ratio (distLeft/distRight) very large.
+         return ratio > 2.0; 
       } else {
-         return ratio < 0.3 || ratio > 3.0; 
+         // Turning left brings nose closer to left cheek (234)
+         // so distLeft gets very small, making ratio very small.
+         return ratio < 0.5; 
       }
       
     case 'nose_wiggle':
