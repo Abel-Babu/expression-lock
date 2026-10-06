@@ -114,10 +114,10 @@ export function renderParticipantTile(container) {
             const distance = computeEuclideanDistance(currentTargetUser.embedding, identityResult.descriptor);
             const confidence = distanceToConfidence(distance);
             
-            if (confidence > 80) { // High threshold for strictness
+            if (distance < 0.5) { // Face-API standard: < 0.5 is a confident match
               passChallenge();
             } else {
-              overlay.textContent = `Identity mismatch (${confidence.toFixed(1)}%). Trying again...`;
+              overlay.textContent = `Identity mismatch (Dist: ${distance.toFixed(2)}). Trying again...`;
             }
           }
         }
