@@ -44,7 +44,7 @@ export async function renderHostPanel(container) {
 
   function addLog(msg) {
     const li = document.createElement('li');
-    li.textContent = \`[\${new Date().toLocaleTimeString()}] \${msg}\`;
+    li.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
     logList.prepend(li);
   }
 
@@ -61,7 +61,7 @@ export async function renderHostPanel(container) {
     sessionStrip.innerHTML = '<span><strong>Status:</strong> Challenge Sent...</span>';
     logList.innerHTML = '';
     
-    addLog(\`Sending liveness challenge trigger to participant \${userId}...\`);
+    addLog(`Sending liveness challenge trigger to participant ${userId}...`);
     
     sendSignal('LIVENESS_REQUEST', { userId });
   });
@@ -70,13 +70,13 @@ export async function renderHostPanel(container) {
     if (type === 'LIVENESS_STARTED') {
       addLog('Participant acknowledged. Challenge sequence started.');
     } else if (type === 'LIVENESS_SUCCESS') {
-      addLog(\`Verification cryptographically signed by \${payload.userName}.\`);
+      addLog(`Verification cryptographically signed by ${payload.userName}.`);
       sessionStrip.className = 'session-strip verified';
-      sessionStrip.innerHTML = \`<span><strong>Status:</strong> Verified - \${payload.userName}</span>\`;
+      sessionStrip.innerHTML = `<span><strong>Status:</strong> Verified - ${payload.userName}</span>`;
     } else if (type === 'LIVENESS_FAILED') {
-      addLog(\`Verification failed: \${payload.reason}\`);
+      addLog(`Verification failed: ${payload.reason}`);
       sessionStrip.className = 'session-strip unverified';
-      sessionStrip.innerHTML = \`<span><strong>Status:</strong> FAILED - \${payload.reason}</span>\`;
+      sessionStrip.innerHTML = `<span><strong>Status:</strong> FAILED - ${payload.reason}</span>`;
     }
   });
 }
