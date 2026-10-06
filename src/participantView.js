@@ -4,6 +4,7 @@ import { sendSignal, onSignal } from './signal.js';
 import { initVisionEngine, startCameraAndTracking, stopCameraAndTracking } from './vision.js';
 import { initIdentityEngine, extractFaceEmbedding, computeEuclideanDistance, distanceToConfidence } from './identity.js';
 import { getRandomChallenge, evaluateChallenge } from './liveness.js';
+import { CONFIG } from './config.js';
 
 export function renderParticipantTile(container) {
   container.innerHTML = `
@@ -91,8 +92,8 @@ export function renderParticipantTile(container) {
         if (!isActive) return;
         frameCount++;
 
-        // Timeout after 15 seconds
-        if (Date.now() - challengeStartTime > 15000) {
+        // Timeout using config
+        if (Date.now() - challengeStartTime > CONFIG.CHALLENGE_TIME_MS) {
           failChallenge('Liveness Challenge Timeout');
           return;
         }
@@ -114,7 +115,7 @@ export function renderParticipantTile(container) {
             const distance = computeEuclideanDistance(currentTargetUser.embedding, identityResult.descriptor);
             const confidence = distanceToConfidence(distance);
             
-            if (distance < 0.5) { // Face-API standard: < 0.5 is a confident match
+            if (distance < CONFIG.IDENTITY_MATCH_DISTANCE) { // Configurable standard threshold
               passChallenge();
             } else {
               overlay.textContent = `Identity mismatch (Dist: ${distance.toFixed(2)}). Trying again...`;

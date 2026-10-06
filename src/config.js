@@ -15,6 +15,13 @@ export const CONFIG = {
   BLINK_MIN_MS: 60,
   BLINK_MAX_MS: 400,
 
+  // Blendshape Thresholds (Tuned for typical webcams)
+  BLENDSHAPE_SMILE: 0.4,
+  BLENDSHAPE_JAW_OPEN: 0.45,
+  BLENDSHAPE_BLINK: 0.45,
+  BLENDSHAPE_BROW_UP: 0.4,
+  BLENDSHAPE_PUCKER: 0.5,
+
   MAR_OPEN: 0.55,
   MAR_HOLD_MS: 500,
   HAND_MOUTH_HOLD_MS: 300,

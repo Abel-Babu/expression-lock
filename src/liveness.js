@@ -1,4 +1,6 @@
 // src/liveness.js - Liveness Challenge Engine
+import { CONFIG } from './config.js';
+
 export const CHALLENGES = [
   { id: 'smile', label: 'Smile brightly', instructions: 'Please smile for the camera' },
   { id: 'mouth_open', label: 'Open your mouth', instructions: 'Open your mouth wide' },
@@ -25,21 +27,21 @@ export function evaluateChallenge(challengeId, blendshapes) {
   switch (challengeId) {
     case 'smile':
       // mouthSmileLeft and mouthSmileRight
-      return (scores['mouthSmileLeft'] > 0.4 && scores['mouthSmileRight'] > 0.4);
+      return (scores['mouthSmileLeft'] > CONFIG.BLENDSHAPE_SMILE && scores['mouthSmileRight'] > CONFIG.BLENDSHAPE_SMILE);
       
     case 'mouth_open':
-      return (scores['jawOpen'] > 0.45); 
+      return (scores['jawOpen'] > CONFIG.BLENDSHAPE_JAW_OPEN); 
       
     case 'blink_eyes':
       // Blinking both eyes is much more reliable than winking
-      return (scores['eyeBlinkLeft'] > 0.45 && scores['eyeBlinkRight'] > 0.45);
+      return (scores['eyeBlinkLeft'] > CONFIG.BLENDSHAPE_BLINK && scores['eyeBlinkRight'] > CONFIG.BLENDSHAPE_BLINK);
       
     case 'eyebrows_up':
       // browInnerUp usually correlates strongly with raised eyebrows
-      return (scores['browInnerUp'] > 0.4);
+      return (scores['browInnerUp'] > CONFIG.BLENDSHAPE_BROW_UP);
       
     case 'pucker':
-      return (scores['mouthPucker'] > 0.5);
+      return (scores['mouthPucker'] > CONFIG.BLENDSHAPE_PUCKER);
       
     default:
       return false;
