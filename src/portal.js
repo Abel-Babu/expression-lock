@@ -144,7 +144,10 @@ export function renderPortal(container) {
   // Handle the action button click
   btn.addEventListener('click', () => {
     if (btn.classList.contains('btn-ready')) {
-      openModal();
+      // Execute the transfer!
+      btn.className = 'btn-action btn-authorized';
+      btn.textContent = 'Transfer Authorized & Executed';
+      strip.innerHTML = '<span><strong>Session Status:</strong> Transaction Complete</span><span>00:00</span>';
     }
   });
 
