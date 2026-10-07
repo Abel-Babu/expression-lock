@@ -45,6 +45,7 @@ async function runAttempt({ challengeCount = 2, nonce = '' }) {
       let isExtractingIdentity = false;
       let countdownStart = 0;
       let challengeHoldStartTime = 0;
+      let hasWaitedForIdentity = false;
 
       notifyHost('READINESS_STEP', { message: 'Please look at the camera. Ensure good lighting.' });
 
@@ -115,9 +116,11 @@ async function runAttempt({ challengeCount = 2, nonce = '' }) {
           if (expressionPassed && frameCount % 5 === 0 && !isExtractingIdentity) {
             isExtractingIdentity = true;
             try {
-              // Add a slight artificial delay so the user sees the "Extracting Identity..." UI
-              // This makes the system feel robust and rigorous.
-              await new Promise(r => setTimeout(r, 1200));
+              if (!hasWaitedForIdentity) {
+                // Add a slight artificial delay so the user sees the "Extracting Identity..." UI
+                await new Promise(r => setTimeout(r, 1200));
+                hasWaitedForIdentity = true;
+              }
 
               const identityResult = await extractFaceEmbedding(video);
               if (identityResult) {
@@ -145,6 +148,7 @@ async function runAttempt({ challengeCount = 2, nonce = '' }) {
                 } else {
                   challengeStartTime = Date.now();
                   challengeHoldStartTime = 0;
+                  hasWaitedForIdentity = false;
                   expressionPassed = false;
                   isExtractingIdentity = false;
                   notifyHost('CHALLENGE_UPDATED', {
@@ -153,6 +157,9 @@ async function runAttempt({ challengeCount = 2, nonce = '' }) {
                     instructions: challengesToRun[currentChallengeIndex].instructions
                   });
                 }
+              } else {
+                // Face was temporarily lost or undetectable. Reset flag to retry on next interval!
+                isExtractingIdentity = false;
               }
             } catch (err) {
               console.error('Extraction error:', err);
