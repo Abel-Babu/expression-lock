@@ -220,7 +220,11 @@ function getOrCreateVideoCanvas() {
 
 // Global listener for extension content script
 window.addEventListener('message', async (event) => {
-  if (event.data && event.data.type === 'WARM_UP_CAMERA') {
+  if (event.data && event.data.type === 'PRELOAD_MODELS') {
+    // Invisibly download models when tab opens so they are ready instantly later
+    initIdentityEngine().catch(console.error);
+    initVisionEngine().catch(console.error);
+  } else if (event.data && event.data.type === 'WARM_UP_CAMERA') {
     try {
       const { video, canvas } = getOrCreateVideoCanvas();
       await startCameraAndTracking(video, canvas, () => {});

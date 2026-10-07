@@ -158,6 +158,7 @@ function init() {
       const url = res.serverUrl || 'ws://localhost:3000';
       myMemberId = res.memberToken || 'dummy-id-' + Math.floor(Math.random()*10000);
       sendToEngine('CONNECT_WS', { url, token: myMemberId, meetingCode });
+      sendToEngine('PRELOAD_MODELS', {});
     });
   };
 
@@ -209,6 +210,9 @@ window.addEventListener('message', (event) => {
   }
 
   // Engine challenge updates
+  if (msg.type === 'STATUS_UPDATE') {
+    shadowRoot.getElementById('cv-inst').innerText = msg.payload.message;
+  }
   if (msg.type === 'READINESS_STEP') {
     shadowRoot.getElementById('cv-title').innerText = 'Readiness Check';
     shadowRoot.getElementById('cv-inst').innerText = msg.payload.message;
