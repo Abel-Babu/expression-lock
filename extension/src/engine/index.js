@@ -44,6 +44,7 @@ async function runAttempt({ challengeCount = 2, nonce = '' }) {
       let frameCount = 0;
       let isExtractingIdentity = false;
       let countdownStart = 0;
+      let challengeHoldStartTime = 0;
 
       notifyHost('READINESS_STEP', { message: 'Please look at the camera. Ensure good lighting.' });
 
@@ -91,8 +92,22 @@ async function runAttempt({ challengeCount = 2, nonce = '' }) {
           // 1. Evaluate Pose/Expression
           if (!expressionPassed && frameData) {
             if (evaluateChallenge(currentChallenge.id, frameData)) {
-              expressionPassed = true;
-              notifyHost('EXPRESSION_PASSED', { index: currentChallengeIndex });
+              if (challengeHoldStartTime === 0) {
+                challengeHoldStartTime = Date.now();
+                notifyHost('CHALLENGE_HOLDING', { index: currentChallengeIndex, instructions: 'Hold it...' });
+              } else if (Date.now() - challengeHoldStartTime > 600) {
+                expressionPassed = true;
+                notifyHost('EXPRESSION_PASSED', { index: currentChallengeIndex });
+              }
+            } else {
+              if (challengeHoldStartTime !== 0) {
+                challengeHoldStartTime = 0;
+                notifyHost('CHALLENGE_UPDATED', {
+                  index: currentChallengeIndex,
+                  total: challengeCount,
+                  instructions: currentChallenge.instructions
+                });
+              }
             }
           }
 
@@ -100,6 +115,10 @@ async function runAttempt({ challengeCount = 2, nonce = '' }) {
           if (expressionPassed && frameCount % 5 === 0 && !isExtractingIdentity) {
             isExtractingIdentity = true;
             try {
+              // Add a slight artificial delay so the user sees the "Extracting Identity..." UI
+              // This makes the system feel robust and rigorous.
+              await new Promise(r => setTimeout(r, 1200));
+
               const identityResult = await extractFaceEmbedding(video);
               if (identityResult) {
                 let distance = 0;
@@ -125,7 +144,9 @@ async function runAttempt({ challengeCount = 2, nonce = '' }) {
                   resolve({ status: 'VERIFIED', signature });
                 } else {
                   challengeStartTime = Date.now();
+                  challengeHoldStartTime = 0;
                   expressionPassed = false;
+                  isExtractingIdentity = false;
                   notifyHost('CHALLENGE_UPDATED', {
                     index: currentChallengeIndex,
                     total: challengeCount,

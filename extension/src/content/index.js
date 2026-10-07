@@ -217,10 +217,15 @@ window.addEventListener('message', (event) => {
     shadowRoot.getElementById('cv-title').innerText = 'Get Ready!';
     shadowRoot.getElementById('cv-inst').innerText = 'Starting in 3...';
   }
+  if (msg.type === 'CHALLENGE_HOLDING') {
+    shadowRoot.getElementById('cv-inst').innerText = msg.payload.instructions;
+    shadowRoot.getElementById('cv-inst').style.color = '#f59e0b'; // Orange/Yellow to indicate hold
+  }
   if (msg.type === 'CHALLENGE_UPDATED') {
     shadowRoot.getElementById('cv-title').innerText = `Task ${msg.payload.index + 1} / ${msg.payload.total}`;
     shadowRoot.getElementById('cv-inst').innerText = msg.payload.instructions;
     shadowRoot.getElementById('cv-title').style.color = 'white';
+    shadowRoot.getElementById('cv-inst').style.color = 'white';
   }
   if (msg.type === 'EXPRESSION_PASSED') {
     shadowRoot.getElementById('cv-title').innerText = `Success!`;
