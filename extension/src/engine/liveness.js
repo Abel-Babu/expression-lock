@@ -93,15 +93,12 @@ export function evaluateChallenge(challengeId, frameData) {
       const distLeft = Math.abs(nose.x - leftCheek.x);
       const distRight = Math.abs(rightCheek.x - nose.x);
       
-      // If looking straight ahead, distLeft and distRight are roughly equal
-      // If turned left, nose is closer to the left cheek (distLeft gets much smaller)
-      // If turned right, nose is closer to the right cheek (distRight gets much smaller)
-      
-      // We want a deep turn to prevent auto-completion
+      // Because MediaPipe processes the unmirrored camera feed, the user's physical left turn 
+      // appears as a right turn to the AI. Therefore, the logic is flipped.
       if (challengeId === 'turn_left') {
-         return distLeft < (distRight * 0.3); 
+         return distRight < (distLeft * 0.35); // User turned physical left -> AI sees right turn
       } else {
-         return distRight < (distLeft * 0.3);
+         return distLeft < (distRight * 0.35); // User turned physical right -> AI sees left turn
       }
     }
 
@@ -122,15 +119,16 @@ export function evaluateChallenge(challengeId, frameData) {
       for (const hand of hands) {
         // Index finger tip is hand landmark 8
         const indexTip = hand[8];
-        const palm = hand[0]; // Wrist/Palm
+        // Use middle finger knuckle (9) instead of wrist (0) for palm center
+        const palmCenter = hand[9]; 
         
         // Calculate distance
         const distNose = Math.sqrt(Math.pow(indexTip.x - nose.x, 2) + Math.pow(indexTip.y - nose.y, 2));
-        const distMouth = Math.sqrt(Math.pow(palm.x - mouth.x, 2) + Math.pow(palm.y - mouth.y, 2));
+        const distMouth = Math.sqrt(Math.pow(palmCenter.x - mouth.x, 2) + Math.pow(palmCenter.y - mouth.y, 2));
         
-        // Use stricter distance threshold (0.10) to prevent auto-completion
-        if (challengeId === 'touch_nose' && distNose < 0.10) return true;
-        if (challengeId === 'cover_face' && distMouth < 0.12) return true;
+        // Relax thresholds to 0.15 and 0.18 for better detection while avoiding auto-completes
+        if (challengeId === 'touch_nose' && distNose < 0.15) return true;
+        if (challengeId === 'cover_face' && distMouth < 0.18) return true;
       }
       return false;
 
