@@ -123,7 +123,9 @@ function bindEvents() {
   shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
     participantCard.classList.add('hidden');
     challengeView.classList.remove('hidden');
-    sendToEngine('WARM_UP_CAMERA', {});
+    setTimeout(() => {
+      sendToEngine('WARM_UP_CAMERA', {});
+    }, 400);
   };
   shadowRoot.getElementById('btn-close-results').onclick = () => {
     resultsView.classList.add('hidden');
@@ -272,7 +274,9 @@ function handleServerEvent(payload) {
       shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
         participantCard.classList.add('hidden');
         challengeView.classList.remove('hidden');
-        sendToEngine('WARM_UP_CAMERA', {});
+        setTimeout(() => {
+          sendToEngine('WARM_UP_CAMERA', {});
+        }, 400);
       };
     } else if (payload.status === 'FAILED') {
       participantCard.classList.remove('hidden');
@@ -298,7 +302,9 @@ function handleServerEvent(payload) {
       shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
         participantCard.classList.add('hidden');
         challengeView.classList.remove('hidden');
-        sendToEngine('WARM_UP_CAMERA', {});
+        setTimeout(() => {
+          sendToEngine('WARM_UP_CAMERA', {});
+        }, 400);
       };
     }
   }
