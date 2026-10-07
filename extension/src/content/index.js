@@ -28,7 +28,7 @@ function injectShadowDOM() {
   style.textContent = `
     .panel { pointer-events: auto; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 8px; padding: 16px; font-family: sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .hidden { display: none !important; }
-    .offscreen { position: absolute !important; opacity: 0 !important; pointer-events: none !important; z-index: -100 !important; }
+    .offscreen { position: absolute !important; opacity: 0.01 !important; pointer-events: none !important; z-index: -100 !important; width: 10px !important; height: 10px !important; overflow: hidden !important; }
     button { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 8px; }
     button:hover { background: #2563eb; }
     .btn-danger { background: #ef4444; }
@@ -93,7 +93,7 @@ function injectShadowDOM() {
   challengeView.innerHTML = `
     <h2 id="cv-title">Get Ready</h2>
     <p id="cv-inst">Looking for face...</p>
-    <iframe id="engine-iframe" src="${chrome.runtime.getURL('src/engine/engine.html')}" allow="camera *; microphone *"></iframe>
+    <iframe id="engine-iframe" src="${chrome.runtime.getURL('src/engine/engine.html')}" allow="camera; microphone"></iframe>
   `;
   shadowRoot.appendChild(challengeView);
 
@@ -194,7 +194,7 @@ window.addEventListener('message', (event) => {
     challengeView.classList.add('offscreen');
     participantCard.innerHTML = `
       <h2>Technical Error</h2>
-      <p style="color:#ef4444">Camera Permission Denied.</p>
+      <p style="color:#ef4444">Camera Error: ${msg.error || 'Permission Denied'}</p>
       <button id="btn-begin-attempt" class="btn-danger">Try Again</button>
     `;
     shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
