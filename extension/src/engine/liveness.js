@@ -117,22 +117,24 @@ export function evaluateChallenge(challengeId, frameData) {
       
       // Check each hand
       for (const hand of hands) {
-        // Index finger tip is hand landmark 8
-        const indexTip = hand[8];
         
-        // Find the closest hand landmark to the mouth
+        // Find the closest hand landmark to the nose and mouth
         let minMouthDist = 1.0;
+        let minNoseDist = 1.0;
+        
         for (const pt of hand) {
-           const d = Math.sqrt(Math.pow(pt.x - mouth.x, 2) + Math.pow(pt.y - mouth.y, 2));
-           if (d < minMouthDist) minMouthDist = d;
+           const dMouth = Math.sqrt(Math.pow(pt.x - mouth.x, 2) + Math.pow(pt.y - mouth.y, 2));
+           const dNose = Math.sqrt(Math.pow(pt.x - nose.x, 2) + Math.pow(pt.y - nose.y, 2));
+           
+           if (dMouth < minMouthDist) minMouthDist = dMouth;
+           if (dNose < minNoseDist) minNoseDist = dNose;
         }
         
-        // Calculate nose distance to index finger tip
-        const distNose = Math.sqrt(Math.pow(indexTip.x - nose.x, 2) + Math.pow(indexTip.y - nose.y, 2));
-        
-        if (challengeId === 'touch_nose' && distNose < 0.15) return true;
-        // If ANY part of the hand is very close to the mouth, it counts as covered
-        if (challengeId === 'cover_face' && minMouthDist < 0.15) return true;
+        // If ANY part of the hand is very close to the target, it counts as covered/touched.
+        // We use a generous 0.18 (18% of screen) radius because MediaPipe often misjudges 
+        // exact finger positions when the hand is pointing at the camera.
+        if (challengeId === 'touch_nose' && minNoseDist < 0.18) return true;
+        if (challengeId === 'cover_face' && minMouthDist < 0.18) return true;
       }
       return false;
 
