@@ -18,24 +18,19 @@ export const FACE_CHALLENGES = [
 
 // Fallback for single random challenge (if needed)
 export function getRandomChallenge() {
-  const all = [...HAND_CHALLENGES, ...FACE_CHALLENGES];
-  return all[Math.floor(Math.random() * all.length)];
+  return FACE_CHALLENGES[Math.floor(Math.random() * FACE_CHALLENGES.length)];
 }
 
-// Generate a sequence of challenges ensuring at least one involves the hand
+// Generate a sequence of pure face challenges for maximum reliability
 export function generateChallengeSequence(count = 2) {
   const sequence = [];
+  const available = [...FACE_CHALLENGES];
   
-  // Pick one random hand challenge
-  const handChallenge = HAND_CHALLENGES[Math.floor(Math.random() * HAND_CHALLENGES.length)];
-  // Pick random face challenges for the rest
-  const faceChallenge = FACE_CHALLENGES[Math.floor(Math.random() * FACE_CHALLENGES.length)];
-  
-  // Randomize the order
-  if (Math.random() > 0.5) {
-    sequence.push(handChallenge, faceChallenge);
-  } else {
-    sequence.push(faceChallenge, handChallenge);
+  // Pick random face challenges without repeating the same one
+  for (let i = 0; i < count; i++) {
+    if (available.length === 0) break;
+    const randomIndex = Math.floor(Math.random() * available.length);
+    sequence.push(available.splice(randomIndex, 1)[0]);
   }
   
   return sequence;
