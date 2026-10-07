@@ -33,23 +33,7 @@ async function runAttempt({ challengeCount = 2, nonce = '' }) {
     }
     
     // Create elements
-    let video = document.getElementById('engine-video');
-    let canvas = document.getElementById('engine-canvas');
-    if (!video) {
-      video = document.createElement('video');
-      video.id = 'engine-video';
-      video.autoplay = true;
-      video.playsInline = true;
-      video.muted = true;
-      video.width = 640;
-      video.height = 480;
-      document.body.appendChild(video);
-    }
-    if (!canvas) {
-      canvas = document.createElement('canvas');
-      canvas.id = 'engine-canvas';
-      document.body.appendChild(canvas);
-    }
+    const { video, canvas } = getOrCreateVideoCanvas();
 
     return new Promise((resolve) => {
       let phase = 'READINESS'; // READINESS -> GET_READY -> CHALLENGES
@@ -184,12 +168,33 @@ async function signResult(nonce, status) {
   return `fallback-sig-${nonce}-${Date.now()}`;
 }
 
+// Helper to create engine elements
+function getOrCreateVideoCanvas() {
+  let video = document.getElementById('engine-video');
+  let canvas = document.getElementById('engine-canvas');
+  if (!video) {
+    video = document.createElement('video');
+    video.id = 'engine-video';
+    video.autoplay = true;
+    video.playsInline = true;
+    video.muted = true;
+    video.width = 640;
+    video.height = 480;
+    document.body.appendChild(video);
+  }
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = 'engine-canvas';
+    document.body.appendChild(canvas);
+  }
+  return { video, canvas };
+}
+
 // Global listener for extension content script
 window.addEventListener('message', async (event) => {
   if (event.data && event.data.type === 'WARM_UP_CAMERA') {
     try {
-      const video = document.getElementById('video');
-      const canvas = document.getElementById('canvas');
+      const { video, canvas } = getOrCreateVideoCanvas();
       await startCameraAndTracking(video, canvas, () => {});
       window.parent.postMessage({ type: 'CAMERA_READY' }, '*');
     } catch (e) {
