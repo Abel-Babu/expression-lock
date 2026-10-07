@@ -224,6 +224,13 @@ window.addEventListener('message', async (event) => {
     try {
       const { video, canvas } = getOrCreateVideoCanvas();
       await startCameraAndTracking(video, canvas, () => {});
+      
+      // Pre-warm the models so WebGL shaders compile in the background
+      // This prevents a massive 10-second freeze during the first challenge!
+      initIdentityEngine().then(() => {
+         extractFaceEmbedding(video).catch(() => {});
+      });
+
       window.parent.postMessage({ type: 'CAMERA_READY' }, '*');
     } catch (e) {
       console.error("Warm up failed", e);
