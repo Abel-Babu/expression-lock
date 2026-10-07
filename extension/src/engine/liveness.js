@@ -11,7 +11,9 @@ export const FACE_CHALLENGES = [
   { id: 'mouth_open', label: 'Open your mouth', instructions: 'Open your mouth wide' },
   { id: 'blink_eyes', label: 'Blink your eyes', instructions: 'Blink both eyes slowly' },
   { id: 'eyebrows_up', label: 'Raise your eyebrows', instructions: 'Raise both eyebrows' },
-  { id: 'pucker', label: 'Pucker your lips', instructions: 'Pucker your lips like a kiss' }
+  { id: 'pucker', label: 'Pucker your lips', instructions: 'Pucker your lips like a kiss' },
+  { id: 'turn_left', label: 'Turn head LEFT', instructions: 'Look firmly to your left' },
+  { id: 'turn_right', label: 'Turn head RIGHT', instructions: 'Look firmly to your right' }
 ];
 
 // Fallback for single random challenge (if needed)
@@ -79,6 +81,30 @@ export function evaluateChallenge(challengeId, frameData) {
       if (!blendshapes) return false;
       return (scores['mouthPucker'] > CONFIG.BLENDSHAPE_PUCKER);
 
+    case 'turn_left':
+    case 'turn_right': {
+      const faceLandmarks = frameData.landmarks || lastKnownFaceLandmarks;
+      if (!faceLandmarks) return false;
+      
+      const nose = faceLandmarks[1];
+      const leftCheek = faceLandmarks[234];
+      const rightCheek = faceLandmarks[454];
+      
+      const distLeft = Math.abs(nose.x - leftCheek.x);
+      const distRight = Math.abs(rightCheek.x - nose.x);
+      
+      // If looking straight ahead, distLeft and distRight are roughly equal
+      // If turned left, nose is closer to the left cheek (distLeft gets much smaller)
+      // If turned right, nose is closer to the right cheek (distRight gets much smaller)
+      
+      // We want a deep turn to prevent auto-completion
+      if (challengeId === 'turn_left') {
+         return distLeft < (distRight * 0.3); 
+      } else {
+         return distRight < (distLeft * 0.3);
+      }
+    }
+
     case 'touch_nose':
     case 'cover_face':
       if (!hands || hands.length === 0) return false;
@@ -102,9 +128,9 @@ export function evaluateChallenge(challengeId, frameData) {
         const distNose = Math.sqrt(Math.pow(indexTip.x - nose.x, 2) + Math.pow(indexTip.y - nose.y, 2));
         const distMouth = Math.sqrt(Math.pow(palm.x - mouth.x, 2) + Math.pow(palm.y - mouth.y, 2));
         
-        // Use very generous distance threshold so it easily registers
-        if (challengeId === 'touch_nose' && distNose < 0.25) return true;
-        if (challengeId === 'cover_face' && distMouth < 0.25) return true;
+        // Use stricter distance threshold (0.10) to prevent auto-completion
+        if (challengeId === 'touch_nose' && distNose < 0.10) return true;
+        if (challengeId === 'cover_face' && distMouth < 0.12) return true;
       }
       return false;
 
