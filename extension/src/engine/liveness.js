@@ -130,11 +130,11 @@ export function evaluateChallenge(challengeId, frameData) {
            if (dNose < minNoseDist) minNoseDist = dNose;
         }
         
-        // If ANY part of the hand is very close to the target, it counts as covered/touched.
-        // We use a generous 0.18 (18% of screen) radius because MediaPipe often misjudges 
-        // exact finger positions when the hand is pointing at the camera.
-        if (challengeId === 'touch_nose' && minNoseDist < 0.18) return true;
-        if (challengeId === 'cover_face' && minMouthDist < 0.18) return true;
+        // MediaPipe Hand tracking loses the hand when it is flat against the skin 
+        // because there is no edge contrast. By expanding the hit-radius to 35% of the screen,
+        // the user can just bring their hand NEAR their face to trigger it before tracking is lost.
+        if (challengeId === 'touch_nose' && minNoseDist < 0.35) return true;
+        if (challengeId === 'cover_face' && minMouthDist < 0.35) return true;
       }
       return false;
 
