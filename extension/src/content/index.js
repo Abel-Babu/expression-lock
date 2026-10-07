@@ -121,7 +121,9 @@ function bindEvents() {
     sendToEngine('WS_SEND', { type: 'START_ROUND', payload: { type: 'STRICT' } });
   };
   shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
-    sendToEngine('WS_SEND', { type: 'BEGIN_ATTEMPT' });
+    participantCard.classList.add('hidden');
+    challengeView.classList.remove('hidden');
+    sendToEngine('WARM_UP_CAMERA', {});
   };
   shadowRoot.getElementById('btn-close-results').onclick = () => {
     resultsView.classList.add('hidden');
@@ -178,6 +180,28 @@ window.addEventListener('message', (event) => {
     if (msg.payload === 'CONNECTED') badge.className = 'status-badge bg-green';
     else badge.className = 'status-badge bg-red';
   }
+
+  if (msg.type === 'CAMERA_READY') {
+    // Camera is warmed up and permission is granted!
+    // Now we can safely tell the server we are beginning the attempt.
+    sendToEngine('WS_SEND', { type: 'BEGIN_ATTEMPT' });
+  }
+
+  if (msg.type === 'CAMERA_FAILED') {
+    // Permission denied or camera broken
+    participantCard.classList.remove('hidden');
+    challengeView.classList.add('hidden');
+    participantCard.innerHTML = `
+      <h2>Technical Error</h2>
+      <p style="color:#ef4444">Camera Permission Denied.</p>
+      <button id="btn-begin-attempt" class="btn-danger">Try Again</button>
+    `;
+    shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
+      participantCard.classList.add('hidden');
+      challengeView.classList.remove('hidden');
+      sendToEngine('WARM_UP_CAMERA', {});
+    };
+  }
   
   if (msg.type === 'SERVER_EVENT') {
     handleServerEvent(msg.payload);
@@ -232,8 +256,8 @@ function handleServerEvent(payload) {
   if (payload.type === 'ATTEMPT_GRANTED') {
     participantCard.classList.add('hidden');
     challengeView.classList.remove('hidden');
-    // Tell engine to run attempt
-    setTimeout(() => { sendToEngine('RUN_ATTEMPT', { challengeCount: 2, nonce: payload.nonce }); }, 500);
+    // Tell engine to run attempt immediately, since camera is already warmed up
+    sendToEngine('RUN_ATTEMPT', { challengeCount: 2, nonce: payload.nonce });
   }
 
   if (payload.type === 'ATTEMPT_RESULT') {
@@ -246,7 +270,9 @@ function handleServerEvent(payload) {
         <button id="btn-begin-attempt" class="btn-danger">Retry (${payload.attemptsLeft} left)</button>
       `;
       shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
-        sendToEngine('WS_SEND', { type: 'BEGIN_ATTEMPT' });
+        participantCard.classList.add('hidden');
+        challengeView.classList.remove('hidden');
+        sendToEngine('WARM_UP_CAMERA', {});
       };
     } else if (payload.status === 'FAILED') {
       participantCard.classList.remove('hidden');
@@ -270,7 +296,9 @@ function handleServerEvent(payload) {
         <button id="btn-begin-attempt" class="btn-danger">Try Again</button>
       `;
       shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
-        sendToEngine('WS_SEND', { type: 'BEGIN_ATTEMPT' });
+        participantCard.classList.add('hidden');
+        challengeView.classList.remove('hidden');
+        sendToEngine('WARM_UP_CAMERA', {});
       };
     }
   }

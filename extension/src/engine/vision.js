@@ -77,8 +77,17 @@ export async function initVisionEngine(onStatusChange) {
   }
 }
 
+let activeOnFrameCallback = null;
+
 export async function startCameraAndTracking(videoEl, canvasEl, onFrameCallback) {
-  // Stop any existing tracks
+  activeOnFrameCallback = onFrameCallback;
+  
+  // If already running, just update the callback and return the existing stream
+  if (currentStream && animationFrameId) {
+     return currentStream;
+  }
+
+  // Stop any existing broken tracks just in case
   stopCameraAndTracking();
 
   try {
@@ -155,8 +164,8 @@ export async function startCameraAndTracking(videoEl, canvasEl, onFrameCallback)
           }
         }
 
-        if (onFrameCallback) {
-          onFrameCallback({
+        if (activeOnFrameCallback) {
+          activeOnFrameCallback({
             landmarks: faceLandmarks,
             blendshapes: blendshapes,
             matrixes: matrixes,

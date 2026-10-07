@@ -186,7 +186,17 @@ async function signResult(nonce, status) {
 
 // Global listener for extension content script
 window.addEventListener('message', async (event) => {
-  if (event.data && event.data.type === 'RUN_ATTEMPT') {
+  if (event.data && event.data.type === 'WARM_UP_CAMERA') {
+    try {
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      await startCameraAndTracking(video, canvas, () => {});
+      window.parent.postMessage({ type: 'CAMERA_READY' }, '*');
+    } catch (e) {
+      console.error("Warm up failed", e);
+      window.parent.postMessage({ type: 'CAMERA_FAILED', error: e.message }, '*');
+    }
+  } else if (event.data && event.data.type === 'RUN_ATTEMPT') {
     const result = await runAttempt(event.data.payload);
     // Submit result directly to WS
     if (wsManager) {
