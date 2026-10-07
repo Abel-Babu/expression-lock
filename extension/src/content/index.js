@@ -28,6 +28,7 @@ function injectShadowDOM() {
   style.textContent = `
     .panel { pointer-events: auto; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 8px; padding: 16px; font-family: sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .hidden { display: none !important; }
+    .offscreen { position: absolute !important; opacity: 0 !important; pointer-events: none !important; z-index: -100 !important; }
     button { background: #3b82f6; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 8px; }
     button:hover { background: #2563eb; }
     .btn-danger { background: #ef4444; }
@@ -88,7 +89,7 @@ function injectShadowDOM() {
   // 4. Challenge View (Contains engine iframe)
   challengeView = document.createElement('div');
   challengeView.id = 'challenge-view';
-  challengeView.className = 'panel hidden';
+  challengeView.className = 'panel offscreen';
   challengeView.innerHTML = `
     <h2 id="cv-title">Get Ready</h2>
     <p id="cv-inst">Looking for face...</p>
@@ -122,10 +123,8 @@ function bindEvents() {
   };
   shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
     participantCard.classList.add('hidden');
-    challengeView.classList.remove('hidden');
-    setTimeout(() => {
-      sendToEngine('WARM_UP_CAMERA', {});
-    }, 400);
+    challengeView.classList.remove('offscreen');
+    sendToEngine('WARM_UP_CAMERA', {});
   };
   shadowRoot.getElementById('btn-close-results').onclick = () => {
     resultsView.classList.add('hidden');
@@ -192,7 +191,7 @@ window.addEventListener('message', (event) => {
   if (msg.type === 'CAMERA_FAILED') {
     // Permission denied or camera broken
     participantCard.classList.remove('hidden');
-    challengeView.classList.add('hidden');
+    challengeView.classList.add('offscreen');
     participantCard.innerHTML = `
       <h2>Technical Error</h2>
       <p style="color:#ef4444">Camera Permission Denied.</p>
@@ -200,7 +199,7 @@ window.addEventListener('message', (event) => {
     `;
     shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
       participantCard.classList.add('hidden');
-      challengeView.classList.remove('hidden');
+      challengeView.classList.remove('offscreen');
       sendToEngine('WARM_UP_CAMERA', {});
     };
   }
@@ -257,13 +256,13 @@ function handleServerEvent(payload) {
   
   if (payload.type === 'ATTEMPT_GRANTED') {
     participantCard.classList.add('hidden');
-    challengeView.classList.remove('hidden');
+    challengeView.classList.remove('offscreen');
     // Tell engine to run attempt immediately, since camera is already warmed up
     sendToEngine('RUN_ATTEMPT', { challengeCount: 2, nonce: payload.nonce });
   }
 
   if (payload.type === 'ATTEMPT_RESULT') {
-    challengeView.classList.add('hidden');
+    challengeView.classList.add('offscreen');
     if (payload.status === 'RETRYING') {
       participantCard.classList.remove('hidden');
       participantCard.innerHTML = `
@@ -273,10 +272,8 @@ function handleServerEvent(payload) {
       `;
       shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
         participantCard.classList.add('hidden');
-        challengeView.classList.remove('hidden');
-        setTimeout(() => {
-          sendToEngine('WARM_UP_CAMERA', {});
-        }, 400);
+        challengeView.classList.remove('offscreen');
+        sendToEngine('WARM_UP_CAMERA', {});
       };
     } else if (payload.status === 'FAILED') {
       participantCard.classList.remove('hidden');
@@ -301,10 +298,8 @@ function handleServerEvent(payload) {
       `;
       shadowRoot.getElementById('btn-begin-attempt').onclick = () => {
         participantCard.classList.add('hidden');
-        challengeView.classList.remove('hidden');
-        setTimeout(() => {
-          sendToEngine('WARM_UP_CAMERA', {});
-        }, 400);
+        challengeView.classList.remove('offscreen');
+        sendToEngine('WARM_UP_CAMERA', {});
       };
     }
   }
