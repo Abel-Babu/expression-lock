@@ -133,29 +133,35 @@ export async function startCameraAndTracking(videoEl, canvasEl, onFrameCallback)
         // Clear canvas
         ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
+        let faceLandmarks = null;
+        let blendshapes = null;
+        let matrixes = null;
+
         if (results && results.faceLandmarks && results.faceLandmarks.length > 0) {
-          const landmarks = results.faceLandmarks[0];
-          drawMesh(ctx, landmarks, canvasEl.width, canvasEl.height);
+          faceLandmarks = results.faceLandmarks[0];
+          blendshapes = results.faceBlendshapes ? results.faceBlendshapes[0] : null;
+          matrixes = results.facialTransformationMatrixes ? results.facialTransformationMatrixes[0] : null;
+          drawMesh(ctx, faceLandmarks, canvasEl.width, canvasEl.height);
+        }
 
-          // If hands detected, draw a simple point on the palm
-          if (handResults && handResults.landmarks && handResults.landmarks.length > 0) {
-            ctx.fillStyle = '#f59e0b';
-            for (const hand of handResults.landmarks) {
-              const palm = hand[0];
-              ctx.beginPath();
-              ctx.arc(palm.x * canvasEl.width, palm.y * canvasEl.height, 5, 0, 2 * Math.PI);
-              ctx.fill();
-            }
+        // If hands detected, draw a simple point on the palm
+        if (handResults && handResults.landmarks && handResults.landmarks.length > 0) {
+          ctx.fillStyle = '#f59e0b';
+          for (const hand of handResults.landmarks) {
+            const palm = hand[0];
+            ctx.beginPath();
+            ctx.arc(palm.x * canvasEl.width, palm.y * canvasEl.height, 5, 0, 2 * Math.PI);
+            ctx.fill();
           }
+        }
 
-          if (onFrameCallback) {
-            onFrameCallback({
-              landmarks,
-              blendshapes: results.faceBlendshapes ? results.faceBlendshapes[0] : null,
-              matrixes: results.facialTransformationMatrixes ? results.facialTransformationMatrixes[0] : null,
-              hands: handResults ? handResults.landmarks : null
-            });
-          }
+        if (onFrameCallback) {
+          onFrameCallback({
+            landmarks: faceLandmarks,
+            blendshapes: blendshapes,
+            matrixes: matrixes,
+            hands: handResults ? handResults.landmarks : null
+          });
         }
       }
 
